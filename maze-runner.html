@@ -846,6 +846,50 @@
       return [];
     }
 
+    // 繪製超亮發光五角星 (避免受 fillStyle 半透明影響而變暗)
+    function drawGlowingStar(cx, cy, outerR) {
+      const innerR = outerR * 0.46;
+      ctx.save();
+
+      // 外層柔和金黃光暈底座
+      const glowGrad = ctx.createRadialGradient(cx, cy, outerR * 0.1, cx, cy, outerR * 1.45);
+      glowGrad.addColorStop(0, 'rgba(250, 204, 21, 0.55)');
+      glowGrad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR * 1.45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 五角星本體
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const angle = (Math.PI / 5) * i - Math.PI / 2;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#fde047';
+      ctx.fill();
+
+      ctx.lineWidth = Math.max(1.5, outerR * 0.12);
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      // 星星中心亮白高光點
+      ctx.beginPath();
+      ctx.arc(cx - outerR * 0.18, cy - outerR * 0.18, outerR * 0.16, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
     // ====== 繪製迷宮畫布 ======
     function drawMaze() {
       const n = state.size;
@@ -866,7 +910,7 @@
         const [r, c] = key.split(',').map(Number);
         const x = pad + c * cellSize;
         const y = pad + r * cellSize;
-        ctx.fillStyle = 'rgba(99, 102, 241, 0.13)';
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.16)';
         ctx.fillRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
       });
 
@@ -875,7 +919,7 @@
         const path = findShortestPath();
         if (path.length > 1) {
           ctx.save();
-          ctx.strokeStyle = 'rgba(250, 204, 21, 0.65)';
+          ctx.strokeStyle = 'rgba(250, 204, 21, 0.75)';
           ctx.lineWidth = Math.max(4, cellSize * 0.14);
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
@@ -928,35 +972,36 @@
       ctx.stroke();
       ctx.restore();
 
-      // 5. 繪製星星與終點
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
+      // 5. 繪製超亮發光星星與終點
       state.stars.forEach(s => {
         if (s.collected) return;
         const sx = pad + (s.c + 0.5) * cellSize;
         const sy = pad + (s.r + 0.5) * cellSize;
-        ctx.font = `${Math.floor(cellSize * 0.52)}px sans-serif`;
-        ctx.fillText('⭐', sx, sy + 2);
+        drawGlowingStar(sx, sy, cellSize * 0.3);
       });
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
       const gx = pad + (state.goal.c + 0.5) * cellSize;
       const gy = pad + (state.goal.r + 0.5) * cellSize;
       // 終點底座光環
-      ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.28)';
       ctx.beginPath();
       ctx.arc(gx, gy, cellSize * 0.38, 0, Math.PI * 2);
       ctx.fill();
+      ctx.fillStyle = '#ffffff'; // 確保後續 Emoji 100% 不透明！
       ctx.font = `${Math.floor(cellSize * 0.62)}px sans-serif`;
       ctx.fillText(themeCfg.goal, gx, gy + 2);
 
       // 6. 繪製玩家角色
       const px = pad + (state.player.c + 0.5) * cellSize;
       const py = pad + (state.player.r + 0.5) * cellSize;
-      ctx.fillStyle = 'rgba(250, 204, 21, 0.22)';
+      ctx.fillStyle = 'rgba(250, 204, 21, 0.28)';
       ctx.beginPath();
       ctx.arc(px, py, cellSize * 0.4, 0, Math.PI * 2);
       ctx.fill();
+      ctx.fillStyle = '#ffffff'; // 確保角色 Emoji 100% 不透明！
       ctx.font = `${Math.floor(cellSize * 0.64)}px sans-serif`;
       ctx.fillText(themeCfg.player, px, py + 2);
 
@@ -979,6 +1024,7 @@
         ctx.beginPath();
         ctx.arc(gx, gy, cellSize * 0.7, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = '#ffffff';
         ctx.font = `${Math.floor(cellSize * 0.55)}px sans-serif`;
         ctx.fillText(themeCfg.goal, gx, gy + 2);
       }
