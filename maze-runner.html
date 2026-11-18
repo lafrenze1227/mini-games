@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>星空迷宮探險家 - 方向鍵闖關與手電筒探險</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #161e31 100%);
+      --card-bg: #1e293b;
+      --surface: #0f172a;
+      --surface-hover: #263449;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: rgba(99, 102, 241, 0.18);
+      --secondary: #10b981;
+      --secondary-light: rgba(16, 185, 129, 0.18);
+      --accent: #f59e0b;
+      --accent-light: rgba(245, 158, 11, 0.18);
+      --danger: #ef4444;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --shadow-lg: 0 20px 28px -5px rgba(0, 0, 0, 0.55), 0 8px 12px -6px rgba(0, 0, 0, 0.4);
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 540px;
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 18px 20px;
+      position: relative;
+      border: 1px solid var(--border);
+    }
+
+    /* 頂部列 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 1.02rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-hover);
+      border-color: #475569;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 首頁設定 */
+    .section-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .option-grid.two-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .option-grid.four-cols {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .option-card {
+      border: 2px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .option-card:hover {
+      border-color: #475569;
+      background: var(--surface-hover);
+    }
+
+    .option-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: #a5b4fc;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .option-emoji {
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .option-title {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .option-card.selected .option-title {
+      color: #c7d2fe;
+    }
+
+    .option-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .option-card.selected .option-desc {
+      color: #a5b4fc;
+    }
+
+    .best-record-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .best-record-label {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .best-record-value {
+      font-weight: 800;
+      color: #fbbf24;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -3px rgba(99, 102, 241, 0.4);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .primary-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    /* 遊戲畫面頂部資訊列 */
+    .hud-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .hud-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px 6px;
+      text-align: center;
+    }
+
+    .hud-label {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .hud-value {
+      font-size: 1.02rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-value.stars { color: #fbbf24; }
+    .hud-value.highlight { color: #818cf8; }
+
+    /* 輔助工具列 */
+    .assist-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .tool-btn {
+      flex: 1;
+      padding: 7px 8px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .tool-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    .tool-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: #c7d2fe;
+    }
+
+    /* 迷宮畫布區 */
+    .maze-wrapper {
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 1 / 1;
+      margin: 0 auto 12px;
+      background: #090d16;
+      border-radius: var(--radius-lg);
+      padding: 6px;
+      border: 2px solid var(--border);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7), 0 10px 20px rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      touch-action: none;
+    }
+
+    canvas#mazeCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      display: block;
+    }
+
+    /* 螢幕方向鍵控制器 (D-Pad) */
+    .dpad-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .dpad-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .dpad-btn {
+      width: 68px;
+      height: 52px;
+      border-radius: 14px;
+      border: 1.5px solid #475569;
+      background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+      color: #f8fafc;
+      font-size: 1.35rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    .dpad-btn:active, .dpad-btn.pressed {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #0f172a;
+      background: var(--primary);
+      border-color: #818cf8;
+    }
+
+    .game-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .quit-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .quit-btn:hover {
+      background: var(--surface);
+      color: var(--text-main);
+    }
+
+    /* 結算畫面 */
+    .result-hero {
+      text-align: center;
+      padding: 10px 0 16px;
+    }
+
+    .result-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: #fbbf24;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .result-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .result-stars-big {
+      font-size: 2.6rem;
+      letter-spacing: 6px;
+      margin: 6px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-box-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .stat-box-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #818cf8;
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      padding: 13px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .secondary-btn:hover {
+      background: var(--surface-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 頂部列 -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">🧭</div>
+        <div>
+          <div class="brand-title">星空迷宮探險家</div>
+          <div class="brand-subtitle">方向鍵尋路 · 夜光手電筒探險</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="./index.html" class="icon-btn" title="返回遊戲大廳">🏠</a>
+        <button id="soundToggleBtn" class="icon-btn" title="切換音效">🔊</button>
+      </div>
+    </div>
+
+    <!-- 畫面 1：首頁設定 -->
+    <div id="startScreen" class="screen active">
+      <div class="section-label">1. 選擇探險角色與終點目標</div>
+      <div class="option-grid four-cols" id="themeSelector">
+        <div class="option-card selected" data-theme="space">
+          <span class="option-emoji">🚀</span>
+          <span class="option-title">太空人</span>
+          <span class="option-desc">尋找地球 🌍</span>
+        </div>
+        <div class="option-card" data-theme="bunny">
+          <span class="option-emoji">🐰</span>
+          <span class="option-title">小玉兔</span>
+          <span class="option-desc">找紅蘿蔔 🥕</span>
+        </div>
+        <div class="option-card" data-theme="cat">
+          <span class="option-emoji">🐱</span>
+          <span class="option-title">小貓咪</span>
+          <span class="option-desc">尋找鮮魚 🐟</span>
+        </div>
+        <div class="option-card" data-theme="car">
+          <span class="option-emoji">🚗</span>
+          <span class="option-title">小賽車</span>
+          <span class="option-desc">衝向終點 🏁</span>
+        </div>
+      </div>
+
+      <div class="section-label">2. 選擇迷宮大小（難度）</div>
+      <div class="option-grid" id="sizeSelector">
+        <div class="option-card selected" data-size="7">
+          <span class="option-title">🌱 簡單 (7×7)</span>
+          <span class="option-desc">路線單純好上手</span>
+        </div>
+        <div class="option-card" data-size="11">
+          <span class="option-title">⭐ 標準 (11×11)</span>
+          <span class="option-desc">岔路較多考驗觀察</span>
+        </div>
+        <div class="option-card" data-size="15">
+          <span class="option-title">👑 挑戰 (15×15)</span>
+          <span class="option-desc">大型迷宮大冒險</span>
+        </div>
+      </div>
+
+      <div class="section-label">3. 選擇視野模式</div>
+      <div class="option-grid two-cols" id="visionSelector">
+        <div class="option-card selected" data-vision="full">
+          <span class="option-title">☀️ 全開視野</span>
+          <span class="option-desc">清楚看見整座迷宮與星星</span>
+        </div>
+        <div class="option-card" data-vision="flashlight">
+          <span class="option-title">🔦 夜光手電筒</span>
+          <span class="option-desc">只照亮角色周圍，刺激好玩</span>
+        </div>
+      </div>
+
+      <div class="best-record-box">
+        <span class="best-record-label" id="bestRecordLabel">此難度最快過關紀錄</span>
+        <span class="best-record-value" id="bestRecordValue">尚無紀錄</span>
+      </div>
+
+      <button id="startBtn" class="primary-btn">
+        <span>出發探險！</span>
+        <span>▶</span>
+      </button>
+    </div>
+
+    <!-- 畫面 2：遊戲進行 -->
+    <div id="gameScreen" class="screen">
+      <div class="hud-bar">
+        <div class="hud-item">
+          <div class="hud-label">收集星星</div>
+          <div class="hud-value stars" id="hudStars">⭐ 0 / 3</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">移動步數</div>
+          <div class="hud-value highlight" id="hudSteps">0</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">探險時間</div>
+          <div class="hud-value" id="hudTime">0.0s</div>
+        </div>
+      </div>
+
+      <div class="assist-toolbar">
+        <button id="toggleFlashlightBtn" class="tool-btn">
+          <span>🔦 手電筒模式：關</span>
+        </button>
+        <button id="toggleHintBtn" class="tool-btn">
+          <span>💡 路線導引提示</span>
+        </button>
+        <button id="newMazeBtn" class="tool-btn">
+          <span>🔄 換一張地圖</span>
+        </button>
+      </div>
+
+      <!-- 迷宮畫布 -->
+      <div class="maze-wrapper" id="mazeWrapper">
+        <canvas id="mazeCanvas" width="600" height="600"></canvas>
+      </div>
+
+      <!-- 螢幕方向鍵控制器 (支援連按與點擊，同時支援鍵盤方向鍵 / WASD) -->
+      <div class="dpad-container">
+        <div class="dpad-row">
+          <button class="dpad-btn" data-dir="up" aria-label="往上">▲</button>
+        </div>
+        <div class="dpad-row">
+          <button class="dpad-btn" data-dir="left" aria-label="往左">◀</button>
+          <button class="dpad-btn" data-dir="down" aria-label="往下">▼</button>
+          <button class="dpad-btn" data-dir="right" aria-label="往右">▶</button>
+        </div>
+      </div>
+
+      <div class="game-footer">
+        <span>💡 按<b>鍵盤方向鍵 (↑↓←→)</b> 或點擊上方方向鈕前進</span>
+        <button id="quitBtn" class="quit-btn">返回設定</button>
+      </div>
+    </div>
+
+    <!-- 畫面 3：過關結算 -->
+    <div id="resultScreen" class="screen">
+      <div class="result-hero">
+        <span id="resultBadge" class="result-badge">🎉 成功走出迷宮！</span>
+        <div class="result-title" id="resultTitle">探險任務大成功！</div>
+        <div class="result-stars-big" id="resultStarsBig">⭐⭐⭐</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">過關耗時</div>
+          <div class="stat-box-val" id="statTime">12.5 秒</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">總移動步數</div>
+          <div class="stat-box-val" id="statSteps">28 步</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="backHomeBtn" class="secondary-btn">調整難度</button>
+        <button id="nextMazeBtn" class="primary-btn">下一關迷宮 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== 音效合成器 ======
+    class SoundEffects {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, delay = 0, gainVal = 0.1) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      step() {
+        this.playTone(340, 'sine', 0.04, 0, 0.06);
+      }
+
+      bump() {
+        this.playTone(140, 'triangle', 0.08, 0, 0.1);
+      }
+
+      star() {
+        this.playTone(783.99, 'sine', 0.08, 0, 0.12);
+        this.playTone(1046.5, 'sine', 0.16, 0.06, 0.14);
+      }
+
+      win() {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => this.playTone(n, 'sine', 0.22, idx * 0.08, 0.14));
+      }
+    }
+
+    const sfx = new SoundEffects();
+
+    const THEMES = {
+      space: { player: '🚀', goal: '🌍', wallColor: '#3b82f6', glowColor: '#60a5fa' },
+      bunny: { player: '🐰', goal: '🥕', wallColor: '#10b981', glowColor: '#34d399' },
+      cat:   { player: '🐱', goal: '🐟', wallColor: '#f59e0b', glowColor: '#fbbf24' },
+      car:   { player: '🚗', goal: '🏁', wallColor: '#ec4899', glowColor: '#f472b6' }
+    };
+
+    // ====== 遊戲狀態 ======
+    const state = {
+      theme: 'space',
+      size: 7,                 // 7 | 11 | 15
+      vision: 'full',          // 'full' | 'flashlight'
+      showHintPath: false,
+      cells: [],               // 二維陣列 [r][c]，包含 top, right, bottom, left 牆壁布林值
+      player: { r: 0, c: 0 },
+      goal: { r: 6, c: 6 },
+      stars: [],               // [{ r, c, collected }]
+      visited: new Set(),      // 記錄走過的足跡
+      steps: 0,
+      startTimeMs: 0,
+      elapsedMs: 0,
+      timerId: null,
+      isPlaying: false
+    };
+
+    const canvas = document.getElementById('mazeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // ====== 迷宮產生演算法 (Recursive Backtracker DFS) ======
+    function generateMaze(n) {
+      const grid = [];
+      for (let r = 0; r < n; r++) {
+        const row = [];
+        for (let c = 0; c < n; c++) {
+          row.push({
+            r, c,
+            visited: false,
+            walls: { top: true, right: true, bottom: true, left: true }
+          });
+        }
+        grid.push(row);
+      }
+
+      const stack = [];
+      const startCell = grid[0][0];
+      startCell.visited = true;
+      stack.push(startCell);
+
+      const dirs = [
+        { dr: -1, dc: 0, wall: 'top', opp: 'bottom' },
+        { dr: 0, dc: 1, wall: 'right', opp: 'left' },
+        { dr: 1, dc: 0, wall: 'bottom', opp: 'top' },
+        { dr: 0, dc: -1, wall: 'left', opp: 'right' }
+      ];
+
+      while (stack.length > 0) {
+        const current = stack[stack.length - 1];
+        const neighbors = [];
+
+        for (const d of dirs) {
+          const nr = current.r + d.dr;
+          const nc = current.c + d.dc;
+          if (nr >= 0 && nr < n && nc >= 0 && nc < n && !grid[nr][nc].visited) {
+            neighbors.push({ cell: grid[nr][nc], dir: d });
+          }
+        }
+
+        if (neighbors.length > 0) {
+          const chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+          current.walls[chosen.dir.wall] = false;
+          chosen.cell.walls[chosen.dir.opp] = false;
+          chosen.cell.visited = true;
+          stack.push(chosen.cell);
+        } else {
+          stack.pop();
+        }
+      }
+
+      state.cells = grid;
+      state.player = { r: 0, c: 0 };
+      state.goal = { r: n - 1, c: n - 1 };
+      state.visited = new Set(['0,0']);
+
+      // 隨機放置 3 顆星星（避開起點與終點）
+      state.stars = [];
+      const candidates = [];
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if ((r === 0 && c === 0) || (r === n - 1 && c === n - 1)) continue;
+          candidates.push({ r, c });
+        }
+      }
+      for (let i = candidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+      for (let i = 0; i < 3; i++) {
+        state.stars.push({ r: candidates[i].r, c: candidates[i].c, collected: false });
+      }
+    }
+
+    // 使用 BFS 尋找從玩家目前位置到終點的最短路徑（用於路線導引提示）
+    function findShortestPath() {
+      const n = state.size;
+      const queue = [[state.player]];
+      const seen = new Set([`${state.player.r},${state.player.c}`]);
+
+      const dirs = [
+        { dr: -1, dc: 0, wall: 'top' },
+        { dr: 0, dc: 1, wall: 'right' },
+        { dr: 1, dc: 0, wall: 'bottom' },
+        { dr: 0, dc: -1, wall: 'left' }
+      ];
+
+      while (queue.length > 0) {
+        const path = queue.shift();
+        const curr = path[path.length - 1];
+        if (curr.r === state.goal.r && curr.c === state.goal.c) {
+          return path;
+        }
+        const cell = state.cells[curr.r][curr.c];
+        for (const d of dirs) {
+          if (!cell.walls[d.wall]) {
+            const nr = curr.r + d.dr;
+            const nc = curr.c + d.dc;
+            const key = `${nr},${nc}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              queue.push([...path, { r: nr, c: nc }]);
+            }
+          }
+        }
+      }
+      return [];
+    }
+
+    // ====== 繪製迷宮畫布 ======
+    function drawMaze() {
+      const n = state.size;
+      const w = canvas.width;
+      const h = canvas.height;
+      const pad = 16;
+      const cellSize = (w - pad * 2) / n;
+      const themeCfg = THEMES[state.theme];
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 1. 底色
+      ctx.fillStyle = '#0b1120';
+      ctx.fillRect(0, 0, w, h);
+
+      // 2. 繪製已探索過的足跡微光格
+      state.visited.forEach(key => {
+        const [r, c] = key.split(',').map(Number);
+        const x = pad + c * cellSize;
+        const y = pad + r * cellSize;
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.13)';
+        ctx.fillRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+      });
+
+      // 3. 若開啟路線導引提示，畫出虛線導引
+      if (state.showHintPath) {
+        const path = findShortestPath();
+        if (path.length > 1) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(250, 204, 21, 0.65)';
+          ctx.lineWidth = Math.max(4, cellSize * 0.14);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.setLineDash([8, 8]);
+          ctx.beginPath();
+          path.forEach((pt, idx) => {
+            const cx = pad + (pt.c + 0.5) * cellSize;
+            const cy = pad + (pt.r + 0.5) * cellSize;
+            if (idx === 0) ctx.moveTo(cx, cy);
+            else ctx.lineTo(cx, cy);
+          });
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // 4. 繪製迷宮牆壁
+      ctx.save();
+      ctx.strokeStyle = themeCfg.wallColor;
+      ctx.lineWidth = n >= 15 ? 3.5 : (n >= 11 ? 4.5 : 6);
+      ctx.lineCap = 'round';
+      ctx.shadowColor = themeCfg.glowColor;
+      ctx.shadowBlur = 6;
+
+      ctx.beginPath();
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          const cell = state.cells[r][c];
+          const x = pad + c * cellSize;
+          const y = pad + r * cellSize;
+
+          if (cell.walls.top) {
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + cellSize, y);
+          }
+          if (cell.walls.right) {
+            ctx.moveTo(x + cellSize, y);
+            ctx.lineTo(x + cellSize, y + cellSize);
+          }
+          if (cell.walls.bottom) {
+            ctx.moveTo(x, y + cellSize);
+            ctx.lineTo(x + cellSize, y + cellSize);
+          }
+          if (cell.walls.left) {
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y + cellSize);
+          }
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // 5. 繪製星星與終點
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      state.stars.forEach(s => {
+        if (s.collected) return;
+        const sx = pad + (s.c + 0.5) * cellSize;
+        const sy = pad + (s.r + 0.5) * cellSize;
+        ctx.font = `${Math.floor(cellSize * 0.52)}px sans-serif`;
+        ctx.fillText('⭐', sx, sy + 2);
+      });
+
+      const gx = pad + (state.goal.c + 0.5) * cellSize;
+      const gy = pad + (state.goal.r + 0.5) * cellSize;
+      // 終點底座光環
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+      ctx.beginPath();
+      ctx.arc(gx, gy, cellSize * 0.38, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.font = `${Math.floor(cellSize * 0.62)}px sans-serif`;
+      ctx.fillText(themeCfg.goal, gx, gy + 2);
+
+      // 6. 繪製玩家角色
+      const px = pad + (state.player.c + 0.5) * cellSize;
+      const py = pad + (state.player.r + 0.5) * cellSize;
+      ctx.fillStyle = 'rgba(250, 204, 21, 0.22)';
+      ctx.beginPath();
+      ctx.arc(px, py, cellSize * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.font = `${Math.floor(cellSize * 0.64)}px sans-serif`;
+      ctx.fillText(themeCfg.player, px, py + 2);
+
+      // 7. 若開啟「夜光手電筒模式」，蓋上聚光燈遮罩（同時微幅標示終點方向）
+      if (state.vision === 'flashlight') {
+        const radius = cellSize * 2.35;
+        const grad = ctx.createRadialGradient(px, py, cellSize * 0.6, px, py, radius);
+        grad.addColorStop(0, 'rgba(9, 13, 22, 0)');
+        grad.addColorStop(0.7, 'rgba(9, 13, 22, 0.82)');
+        grad.addColorStop(1, 'rgba(9, 13, 22, 0.97)');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        // 讓終點在黑暗中也發出微微的呼吸光點，幫助孩子辨認目標方位
+        const goalGrad = ctx.createRadialGradient(gx, gy, 2, gx, gy, cellSize * 0.7);
+        goalGrad.addColorStop(0, 'rgba(16, 185, 129, 0.55)');
+        goalGrad.addColorStop(1, 'rgba(16, 185, 129, 0)');
+        ctx.fillStyle = goalGrad;
+        ctx.beginPath();
+        ctx.arc(gx, gy, cellSize * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.font = `${Math.floor(cellSize * 0.55)}px sans-serif`;
+        ctx.fillText(themeCfg.goal, gx, gy + 2);
+      }
+    }
+
+    // ====== 角色移動控制 ======
+    function movePlayer(dir) {
+      if (!state.isPlaying) return;
+
+      const { r, c } = state.player;
+      const cell = state.cells[r][c];
+      let nr = r;
+      let nc = c;
+
+      if (dir === 'up') {
+        if (cell.walls.top) { sfx.bump(); return; }
+        nr--;
+      } else if (dir === 'right') {
+        if (cell.walls.right) { sfx.bump(); return; }
+        nc++;
+      } else if (dir === 'down') {
+        if (cell.walls.bottom) { sfx.bump(); return; }
+        nr++;
+      } else if (dir === 'left') {
+        if (cell.walls.left) { sfx.bump(); return; }
+        nc--;
+      }
+
+      state.player = { r: nr, c: nc };
+      state.visited.add(`${nr},${nc}`);
+      state.steps++;
+
+      // 檢查是否吃到星星
+      let gotStar = false;
+      state.stars.forEach(s => {
+        if (!s.collected && s.r === nr && s.c === nc) {
+          s.collected = true;
+          gotStar = true;
+        }
+      });
+
+      if (gotStar) {
+        sfx.star();
+      } else {
+        sfx.step();
+      }
+
+      updateHud();
+      drawMaze();
+
+      // 檢查是否抵達終點
+      if (nr === state.goal.r && nc === state.goal.c) {
+        onMazeCompleted();
+      }
+    }
+
+    function updateHud() {
+      const collectedCount = state.stars.filter(s => s.collected).length;
+      document.getElementById('hudStars').textContent = `⭐ ${collectedCount} / 3`;
+      document.getElementById('hudSteps').textContent = `${state.steps}`;
+    }
+
+    // ====== 最佳紀錄存取 ======
+    function getBestKey() {
+      return `maze_best_size_${state.size}_${state.vision}`;
+    }
+
+    function updateBestRecordUI() {
+      const raw = localStorage.getItem(getBestKey());
+      document.getElementById('bestRecordValue').textContent = raw ? `${parseFloat(raw).toFixed(1)} 秒` : '尚無紀錄';
+    }
+
+    // ====== 遊戲流程 ======
+    const screens = {
+      start: document.getElementById('startScreen'),
+      game: document.getElementById('gameScreen'),
+      result: document.getElementById('resultScreen')
+    };
+
+    function switchScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    function startGame() {
+      sfx.init();
+      state.steps = 0;
+      state.showHintPath = false;
+      state.isPlaying = true;
+      state.startTimeMs = performance.now();
+      state.elapsedMs = 0;
+
+      document.getElementById('toggleHintBtn').classList.remove('active');
+      syncFlashlightBtnUI();
+
+      generateMaze(Number(state.size));
+      updateHud();
+      drawMaze();
+      switchScreen('game');
+
+      clearInterval(state.timerId);
+      state.timerId = setInterval(() => {
+        if (!state.isPlaying) return;
+        state.elapsedMs = performance.now() - state.startTimeMs;
+        document.getElementById('hudTime').textContent = `${(state.elapsedMs / 1000).toFixed(1)}s`;
+      }, 100);
+    }
+
+    function syncFlashlightBtnUI() {
+      const btn = document.getElementById('toggleFlashlightBtn');
+      const isFlash = state.vision === 'flashlight';
+      btn.classList.toggle('active', isFlash);
+      btn.innerHTML = `<span>🔦 手電筒模式：${isFlash ? '開' : '關'}</span>`;
+    }
+
+    function onMazeCompleted() {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      sfx.win();
+
+      const totalSec = Number((state.elapsedMs / 1000).toFixed(1));
+      const key = getBestKey();
+      const prev = localStorage.getItem(key);
+      let isNewRecord = false;
+      if (!prev || totalSec < parseFloat(prev)) {
+        localStorage.setItem(key, String(totalSec));
+        isNewRecord = true;
+      }
+
+      const collectedCount = state.stars.filter(s => s.collected).length;
+      const starDisplay = '⭐'.repeat(collectedCount) + '☆'.repeat(3 - collectedCount);
+
+      setTimeout(() => {
+        document.getElementById('resultBadge').textContent = isNewRecord ? '🏆 刷新最快紀錄！' : '🎉 成功走出迷宮！';
+        document.getElementById('resultStarsBig').textContent = starDisplay;
+        document.getElementById('statTime').textContent = `${totalSec.toFixed(1)} 秒`;
+        document.getElementById('statSteps').textContent = `${state.steps} 步`;
+        updateBestRecordUI();
+        switchScreen('result');
+      }, 320);
+    }
+
+    // ====== 鍵盤與螢幕方向鍵綁定 ======
+    window.addEventListener('keydown', (e) => {
+      if (!state.isPlaying) return;
+      const keyMap = {
+        ArrowUp: 'up', KeyW: 'up',
+        ArrowRight: 'right', KeyD: 'right',
+        ArrowDown: 'down', KeyS: 'down',
+        ArrowLeft: 'left', KeyA: 'left'
+      };
+      const dir = keyMap[e.code] || keyMap[e.key];
+      if (dir) {
+        e.preventDefault();
+        highlightDpadBtn(dir);
+        movePlayer(dir);
+      }
+    });
+
+    function highlightDpadBtn(dir) {
+      const btn = document.querySelector(`.dpad-btn[data-dir="${dir}"]`);
+      if (!btn) return;
+      btn.classList.add('pressed');
+      setTimeout(() => btn.classList.remove('pressed'), 100);
+    }
+
+    // 支援按住螢幕方向鈕連續前進
+    let holdInterval = null;
+    function stopHoldMove() {
+      if (holdInterval) {
+        clearInterval(holdInterval);
+        holdInterval = null;
+      }
+    }
+
+    document.querySelectorAll('.dpad-btn').forEach(btn => {
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const dir = btn.dataset.dir;
+        movePlayer(dir);
+        stopHoldMove();
+        holdInterval = setInterval(() => movePlayer(dir), 155);
+      });
+    });
+
+    window.addEventListener('pointerup', stopHoldMove);
+    window.addEventListener('pointercancel', stopHoldMove);
+
+    // 同時支援在迷宮畫布上直接滑動 (Swipe) 前進
+    let swipeStart = null;
+    canvas.addEventListener('pointerdown', (e) => {
+      swipeStart = { x: e.clientX, y: e.clientY };
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!swipeStart || !state.isPlaying) return;
+      const dx = e.clientX - swipeStart.x;
+      const dy = e.clientY - swipeStart.y;
+      if (Math.hypot(dx, dy) >= 26) {
+        if (Math.abs(dx) > Math.abs(dy)) {
+          movePlayer(dx > 0 ? 'right' : 'left');
+        } else {
+          movePlayer(dy > 0 ? 'down' : 'up');
+        }
+        swipeStart = { x: e.clientX, y: e.clientY };
+      }
+    });
+    window.addEventListener('pointerup', () => { swipeStart = null; });
+
+    // ====== 首頁設定與工具列綁定 ======
+    function bindSelector(containerId, prop, attr) {
+      document.getElementById(containerId).addEventListener('click', (e) => {
+        const card = e.target.closest('.option-card');
+        if (!card) return;
+        document.querySelectorAll(`#${containerId} .option-card`).forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        state[prop] = card.dataset[attr];
+        updateBestRecordUI();
+      });
+    }
+
+    bindSelector('themeSelector', 'theme', 'theme');
+    bindSelector('sizeSelector', 'size', 'size');
+    bindSelector('visionSelector', 'vision', 'vision');
+
+    document.getElementById('toggleFlashlightBtn').addEventListener('click', () => {
+      state.vision = state.vision === 'flashlight' ? 'full' : 'flashlight';
+      syncFlashlightBtnUI();
+      drawMaze();
+    });
+
+    document.getElementById('toggleHintBtn').addEventListener('click', (e) => {
+      state.showHintPath = !state.showHintPath;
+      e.currentTarget.classList.toggle('active', state.showHintPath);
+      drawMaze();
+    });
+
+    document.getElementById('newMazeBtn').addEventListener('click', startGame);
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('nextMazeBtn').addEventListener('click', startGame);
+    document.getElementById('backHomeBtn').addEventListener('click', () => switchScreen('start'));
+    document.getElementById('quitBtn').addEventListener('click', () => {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      switchScreen('start');
+    });
+
+    document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+      sfx.enabled = !sfx.enabled;
+      e.currentTarget.textContent = sfx.enabled ? '🔊' : '🔇';
+    });
+
+    updateBestRecordUI();
+  </script>
+</body>
+</html>
