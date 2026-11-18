@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>珠心算小達人 - 基礎撥珠與加減法挑戰</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #fffbeb 0%, #eff6ff 50%, #f5f3ff 100%);
+      --card-bg: #ffffff;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --secondary: #10b981;
+      --secondary-light: #ecfdf5;
+      --accent: #f59e0b;
+      --accent-light: #fffbeb;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 540px;
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+
+    /* 頂部列 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      font-weight: 900;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
+    }
+
+    .brand-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-main);
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 主題切換大標籤 (基礎識珠 vs 進階加減法) */
+    .category-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: #f1f5f9;
+      padding: 5px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+    }
+
+    .category-tab {
+      border: none;
+      background: transparent;
+      padding: 10px 8px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .category-tab span.sub {
+      font-size: 0.68rem;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
+    .category-tab.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+
+    /* 首頁設定區塊 */
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #475569;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .option-grid.two-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .option-grid.four-cols {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .option-card {
+      border: 2px solid var(--border);
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 9px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .option-card:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .option-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .option-title {
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .option-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .option-card.selected .option-desc {
+      color: #4338ca;
+    }
+
+    .best-record-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 9px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .best-record-label {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .best-record-value {
+      font-weight: 800;
+      color: #d97706;
+      font-size: 0.9rem;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-lg);
+      background: var(--primary);
+      color: white;
+      font-size: 1.02rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.3);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .primary-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* 遊戲頂部資訊列 */
+    .hud-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .hud-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px 6px;
+      text-align: center;
+    }
+
+    .hud-label {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .hud-value {
+      font-size: 1.02rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-value.highlight { color: var(--primary); }
+    .hud-value.streak { color: #d97706; }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%);
+      border-radius: 999px;
+      transition: width 0.2s linear;
+    }
+
+    /* 題目與口訣提示卡 */
+    .question-card {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      text-align: center;
+      margin-bottom: 10px;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .question-card.correct-flash {
+      border-color: var(--secondary);
+      background: var(--secondary-light);
+    }
+
+    .question-card.wrong-shake {
+      border-color: var(--danger);
+      background: var(--danger-light);
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-7px); }
+      40%, 80% { transform: translateX(7px); }
+    }
+
+    /* 基礎撥珠模式的位數拆解卡片 */
+    .basic-target-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 4px 0;
+    }
+
+    .digit-card {
+      min-width: 58px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.18s ease;
+    }
+
+    .digit-card.matched {
+      border-color: var(--secondary);
+      background: var(--secondary-light);
+      color: #065f46;
+    }
+
+    .digit-card-place {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .digit-card.matched .digit-card-place {
+      color: #059669;
+    }
+
+    .digit-card-num {
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 加減法算式顯示 */
+    .equation {
+      font-size: 2.2rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .eq-part {
+      padding: 2px 8px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .eq-part.active-step {
+      background: #fef3c7;
+      color: #b45309;
+      box-shadow: 0 0 0 2px #f59e0b;
+    }
+
+    .operator {
+      color: var(--primary);
+    }
+
+    .answer-slot {
+      min-width: 72px;
+      height: 50px;
+      padding: 0 12px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 3px solid var(--primary);
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.9rem;
+      font-weight: 900;
+    }
+
+    .answer-slot.empty::after {
+      content: "?";
+      color: #cbd5e1;
+    }
+
+    /* 珠心算口訣與步驟橫幅 */
+    .formula-banner {
+      margin-top: 8px;
+      padding: 7px 11px;
+      border-radius: 10px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+    }
+
+    .step-guide {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #b45309;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .formula-text {
+      font-size: 0.75rem;
+      color: #92400e;
+      font-weight: 600;
+    }
+
+    .feedback-pill {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      opacity: 0;
+      z-index: 10;
+      transition: all 0.15s ease;
+    }
+
+    .feedback-pill.show { opacity: 1; }
+    .feedback-pill.good { background: var(--secondary); color: white; }
+    .feedback-pill.bad { background: var(--danger); color: white; }
+
+    /* ====== 四檔互動算盤區 (千位、百位、十位、個位，1上珠 4下珠) ====== */
+    .abacus-wrapper {
+      background: #fdf8f0;
+      border: 2px solid #e2d5c3;
+      border-radius: var(--radius-lg);
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .abacus-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .abacus-readout {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #78350f;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .abacus-readout-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 8px;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #b45309;
+      font-size: 0.98rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .abacus-reset-btn {
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid #d6c4ae;
+      background: #ffffff;
+      color: #78350f;
+      cursor: pointer;
+    }
+
+    .abacus-reset-btn:hover {
+      background: #fef3c7;
+    }
+
+    /* 算盤木框 */
+    .abacus-frame {
+      background: linear-gradient(180deg, #5c3a21 0%, #3d2514 100%);
+      border-radius: 14px;
+      padding: 9px 12px;
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(92, 58, 33, 0.2);
+      position: relative;
+    }
+
+    .abacus-inner {
+      background: #faf3e8;
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #2b190d;
+    }
+
+    .abacus-inner.cols-1 { grid-template-columns: 1fr; }
+    .abacus-inner.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .abacus-inner.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .abacus-inner.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+    /* 橫樑 (Beam)：精準置於天珠區底端 (6 + 20 + 6 + 58 + 11 = 101px) */
+    .abacus-beam {
+      position: absolute;
+      top: 101px;
+      left: 0;
+      right: 0;
+      height: 12px;
+      background: linear-gradient(180deg, #3d2514 0%, #1f1209 100%);
+      z-index: 5;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+
+    /* 每一檔 (柱) */
+    .abacus-rod {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 0;
+    }
+
+    .rod-label {
+      height: 20px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #78350f;
+      background: #efe4d2;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      z-index: 3;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .abacus-rod.rod-matched .rod-label {
+      background: #d1fae5;
+      color: #065f46;
+      border-color: #10b981;
+    }
+
+    /* 定位點 (在橫樑正中央高度：90 + 3 = 93px) */
+    .rod-beam-dot {
+      position: absolute;
+      top: 93px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ffffff;
+      z-index: 6;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    /* 中央木桿 */
+    .rod-pole {
+      position: absolute;
+      top: 26px;
+      bottom: 6px;
+      width: 7px;
+      background: linear-gradient(90deg, #8c6239 0%, #5c3a21 50%, #3d2514 100%);
+      border-radius: 4px;
+      z-index: 1;
+    }
+
+    /* 上珠區 (天珠，代表 5)：高度 58px，未撥時在頂端離橫樑 33px，撥下時剛好貼齊橫樑上緣 */
+    .heaven-deck {
+      height: 58px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      z-index: 3;
+      margin-bottom: 12px; /* 留給橫樑 12px */
+    }
+
+    /* 下珠區 (地珠，4顆，各代表 1)：高度 140px，4顆珠共 108px，撥上時位移 -31px 剛好貼齊橫樑下緣 */
+    .earth-deck {
+      height: 140px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 3;
+    }
+
+    /* 算珠造型 */
+    .bead {
+      width: 66px;
+      max-width: 86%;
+      height: 25px;
+      border-radius: 13px;
+      cursor: pointer;
+      position: relative;
+      z-index: 4;
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.15s ease;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.45);
+    }
+
+    /* 算珠中央立體稜線質感 */
+    .bead::after {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 46%;
+      height: 2px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+    }
+
+    .abacus-wrapper.readonly .bead {
+      cursor: default;
+    }
+
+    /* 上珠配色 (琥珀橘紅)：未撥時離橫樑 33px，撥下時位移 +32px 完整露出並緊貼橫樑上緣 */
+    .bead.heaven-bead {
+      background: linear-gradient(180deg, #fb923c 0%, #ea580c 55%, #9a3412 100%);
+      border: 1px solid #9a3412;
+      transform: translateY(0px);
+    }
+
+    .bead.heaven-bead.active {
+      transform: translateY(32px);
+      background: linear-gradient(180deg, #f97316 0%, #c2410c 55%, #7c2d12 100%);
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.6);
+    }
+
+    /* 下珠配色：未撥時在底部，撥上時位移 -31px 緊貼橫樑下緣 (僅留 1px 邊界) */
+    .bead.earth-bead {
+      background: linear-gradient(180deg, #fcd34d 0%, #d97706 60%, #92400e 100%);
+      border: 1px solid #92400e;
+      transform: translateY(0px);
+      margin: 1px 0;
+    }
+
+    .bead.earth-bead.active {
+      transform: translateY(-31px);
+      background: linear-gradient(180deg, #34d399 0%, #059669 60%, #065f46 100%);
+      border-color: #065f46;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.6);
+    }
+
+    .bead:hover {
+      filter: brightness(1.08);
+    }
+
+    /* 教學提示閃爍珠子 */
+    .bead.hint-pulse {
+      animation: beadPulse 0.9s infinite alternate;
+    }
+
+    @keyframes beadPulse {
+      from { filter: drop-shadow(0 0 2px #4f46e5); }
+      to { filter: drop-shadow(0 0 9px #4f46e5) brightness(1.18); }
+    }
+
+    /* 虛擬數字鍵盤 */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .keypad.compact {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    .key-btn {
+      height: 48px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 1.3rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #cbd5e1;
+      transition: all 0.08s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .keypad.compact .key-btn {
+      height: 40px;
+      font-size: 1.05rem;
+    }
+
+    .key-btn:active, .key-btn.pressed {
+      transform: translateY(3px);
+      box-shadow: 0 0 0 #cbd5e1;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .key-btn.action-clear {
+      background: #fef2f2;
+      color: var(--danger);
+      border-color: #fecaca;
+      font-size: 0.9rem;
+    }
+
+    .key-btn.action-back {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 1.05rem;
+    }
+
+    .game-footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .quit-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .quit-btn:hover {
+      background: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    /* 結算畫面 */
+    .result-hero {
+      text-align: center;
+      padding: 8px 0 14px;
+    }
+
+    .result-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: #d97706;
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .result-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    .result-score-big {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1.1;
+      margin: 6px 0;
+    }
+
+    .result-score-unit {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-box-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .stat-box-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .history-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      margin-bottom: 14px;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+
+    .history-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .history-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .history-chip {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      padding: 13px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 400px) {
+      .bead {
+        width: 54px;
+        font-size: 0.64rem;
+      }
+      .digit-card {
+        min-width: 48px;
+        padding: 4px 6px;
+      }
+      .digit-card-num {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 頂部列 -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">🧮</div>
+        <div>
+          <div class="brand-title">珠心算小達人</div>
+          <div class="brand-subtitle">1上珠 4下珠 · 基礎識珠與加減法訓練</div>
+        </div>
+      </div>
+      <button id="soundToggleBtn" class="icon-btn" title="切換音效">🔊</button>
+    </div>
+
+    <!-- 畫面 1：首頁設定 -->
+    <div id="startScreen" class="screen active">
+      <!-- 兩大主題切換 Tab -->
+      <div class="category-tabs" id="mainCategoryTabs">
+        <button class="category-tab active" data-cat="basic">
+          <span>🌱 基礎：撥珠與識數</span>
+          <span class="sub">不需計算，照題目撥珠或讀盤</span>
+        </button>
+        <button class="category-tab" data-cat="calc">
+          <span>➕ 進階：加減法珠心算</span>
+          <span class="sub">個位數加減與珠算口訣練習</span>
+        </button>
+      </div>
+
+      <!-- ====== 設定面板 A：基礎撥珠練習 ====== -->
+      <div id="basicConfigPanel">
+        <div class="section-label">1. 選擇練習方式</div>
+        <div class="option-grid two-cols" id="basicTypeSelector">
+          <div class="option-card selected" data-btype="set_beads">
+            <span class="option-title">👆 看數字撥算盤</span>
+            <span class="option-desc">看題目給的數字<br>把每檔算珠撥到正確位置</span>
+          </div>
+          <div class="option-card" data-btype="read_beads">
+            <span class="option-title">👀 看算盤認數字</span>
+            <span class="option-desc">觀察算盤上的珠子<br>用數字鍵輸入代表多少</span>
+          </div>
+        </div>
+
+        <div class="section-label">2. 選擇位數難度（個位 ～ 千位）</div>
+        <div class="option-grid four-cols" id="basicDigitsSelector">
+          <div class="option-card selected" data-digits="1">
+            <span class="option-title">個位數</span>
+            <span class="option-desc">1 ~ 9<br>(1 檔)</span>
+          </div>
+          <div class="option-card" data-digits="2">
+            <span class="option-title">十位數</span>
+            <span class="option-desc">10 ~ 99<br>(2 檔)</span>
+          </div>
+          <div class="option-card" data-digits="3">
+            <span class="option-title">百位數</span>
+            <span class="option-desc">100~999<br>(3 檔)</span>
+          </div>
+          <div class="option-card" data-digits="4">
+            <span class="option-title">千位數</span>
+            <span class="option-desc">1000~9999<br>(4 檔)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 設定面板 B：進階加減法珠心算 ====== -->
+      <div id="calcConfigPanel" class="hidden">
+        <div class="section-label">1. 選擇加減法作答方式</div>
+        <div class="option-grid" id="playStyleSelector">
+          <div class="option-card selected" data-style="step_abacus">
+            <span class="option-title">👆 逐步撥珠</span>
+            <span class="option-desc">先撥第一數<br>再照口訣加減</span>
+          </div>
+          <div class="option-card" data-style="direct_abacus">
+            <span class="option-title">🧮 直接撥答案</span>
+            <span class="option-desc">撥出最終答案<br>或按數字鍵</span>
+          </div>
+          <div class="option-card" data-style="mental_keypad">
+            <span class="option-title">⌨️ 心算按鍵</span>
+            <span class="option-desc">看口訣提示<br>用數字鍵作答</span>
+          </div>
+        </div>
+
+        <div class="section-label">2. 選擇珠算口訣分級</div>
+        <div class="option-grid two-cols" id="lessonSelector">
+          <div class="option-card selected" data-lesson="all">
+            <span class="option-title">🌟 全部綜合 (1~9)</span>
+            <span class="option-desc">直加直減、五珠、十珠進位</span>
+          </div>
+          <div class="option-card" data-lesson="direct">
+            <span class="option-title">🌱 直加直減</span>
+            <span class="option-desc">不需湊五或進十，直接撥珠</span>
+          </div>
+          <div class="option-card" data-lesson="five">
+            <span class="option-title">🖐️ 湊五 / 破五</span>
+            <span class="option-desc">上珠 5 的合成與分解口訣</span>
+          </div>
+          <div class="option-card" data-lesson="ten">
+            <span class="option-title">🔟 進十 / 退十</span>
+            <span class="option-desc">十位檔進位與補數口訣</span>
+          </div>
+        </div>
+
+        <div class="section-label">3. 選擇運算類型</div>
+        <div class="option-grid" id="opSelector">
+          <div class="option-card" data-op="add">
+            <span class="option-title">＋ 純加法</span>
+          </div>
+          <div class="option-card" data-op="sub">
+            <span class="option-title">－ 純減法</span>
+          </div>
+          <div class="option-card selected" data-op="mix">
+            <span class="option-title">± 加減混合</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 共同設定：挑戰模式 -->
+      <div class="section-label">挑戰題數 / 計時模式</div>
+      <div class="option-grid two-cols" id="modeSelector">
+        <div class="option-card selected" data-mode="count10">
+          <span class="option-title">🎯 10 題闖關</span>
+          <span class="option-desc">穩紮穩打完成 10 題練習</span>
+        </div>
+        <div class="option-card" data-mode="timed60">
+          <span class="option-title">⏱️ 60 秒挑戰</span>
+          <span class="option-desc">限時內完成越多題越好</span>
+        </div>
+      </div>
+
+      <div class="best-record-box">
+        <span class="best-record-label">此模式最佳紀錄</span>
+        <span class="best-record-value" id="bestRecordValue">尚無紀錄</span>
+      </div>
+
+      <button id="startBtn" class="primary-btn">
+        <span id="startBtnText">開始撥珠練習</span>
+        <span>▶</span>
+      </button>
+    </div>
+
+    <!-- 畫面 2：遊戲進行 -->
+    <div id="gameScreen" class="screen">
+      <div class="hud-bar">
+        <div class="hud-item">
+          <div class="hud-label" id="hudPrimaryLabel">完成進度</div>
+          <div class="hud-value highlight" id="hudPrimaryValue">0 / 10</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label" id="hudSecondaryLabel">已用時間</div>
+          <div class="hud-value" id="hudSecondaryValue">0.0s</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">連續完成</div>
+          <div class="hud-value streak" id="hudStreakValue">0 🔥</div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <!-- 題目與口訣橫幅 -->
+      <div id="questionCard" class="question-card">
+        <span id="feedbackPill" class="feedback-pill">太棒了！</span>
+
+        <!-- 基礎模式專用：每位數拆解卡片 (千、百、十、個) -->
+        <div id="basicTargetArea" class="basic-target-row"></div>
+
+        <!-- 加減法或看盤認數專用：算式與答案格 -->
+        <div id="equationArea" class="equation hidden">
+          <span id="numA" class="eq-part">4</span>
+          <span id="opSign" class="operator">+</span>
+          <span id="numB" class="eq-part">3</span>
+          <span id="eqSign">=</span>
+          <span id="answerSlot" class="answer-slot empty"></span>
+        </div>
+
+        <div class="formula-banner" id="formulaBanner">
+          <div class="step-guide">
+            <span id="stepGuideText">請依照上方數字撥動算珠</span>
+            <span id="formulaCategoryTag" style="font-size:0.7rem;background:#fef3c7;padding:2px 7px;border-radius:6px;border:1px solid #f59e0b;white-space:nowrap;">基礎撥珠</span>
+          </div>
+          <div class="formula-text" id="formulaHintText">💡 上珠代表 5（往下撥靠樑），下珠每顆代表 1（往上推靠樑）</div>
+        </div>
+      </div>
+
+      <!-- 互動算盤區 (最高 4 檔：千、百、十、個) -->
+      <div class="abacus-wrapper" id="abacusWrapper">
+        <div class="abacus-header">
+          <div class="abacus-readout" id="abacusReadoutBox">
+            <span>目前算盤數值：</span>
+            <span class="abacus-readout-num" id="abacusValueDisplay">0</span>
+          </div>
+          <button class="abacus-reset-btn" id="resetAbacusBtn">算盤歸零 (清盤)</button>
+        </div>
+
+        <div class="abacus-frame">
+          <div class="abacus-beam"></div>
+
+          <div class="abacus-inner cols-4" id="abacusInner">
+            <!-- 千位檔 (rod 3) -->
+            <div class="abacus-rod" data-rod="3">
+              <span class="rod-label">千位</span>
+              <div class="rod-beam-dot"></div>
+              <div class="rod-pole"></div>
+              <div class="heaven-deck">
+                <div class="bead heaven-bead" data-rod="3" data-deck="heaven"></div>
+              </div>
+              <div class="earth-deck">
+                <div class="bead earth-bead" data-rod="3" data-deck="earth" data-idx="1"></div>
+                <div class="bead earth-bead" data-rod="3" data-deck="earth" data-idx="2"></div>
+                <div class="bead earth-bead" data-rod="3" data-deck="earth" data-idx="3"></div>
+                <div class="bead earth-bead" data-rod="3" data-deck="earth" data-idx="4"></div>
+              </div>
+            </div>
+
+            <!-- 百位檔 (rod 2) -->
+            <div class="abacus-rod" data-rod="2">
+              <span class="rod-label">百位</span>
+              <div class="rod-beam-dot"></div>
+              <div class="rod-pole"></div>
+              <div class="heaven-deck">
+                <div class="bead heaven-bead" data-rod="2" data-deck="heaven"></div>
+              </div>
+              <div class="earth-deck">
+                <div class="bead earth-bead" data-rod="2" data-deck="earth" data-idx="1"></div>
+                <div class="bead earth-bead" data-rod="2" data-deck="earth" data-idx="2"></div>
+                <div class="bead earth-bead" data-rod="2" data-deck="earth" data-idx="3"></div>
+                <div class="bead earth-bead" data-rod="2" data-deck="earth" data-idx="4"></div>
+              </div>
+            </div>
+
+            <!-- 十位檔 (rod 1) -->
+            <div class="abacus-rod" data-rod="1">
+              <span class="rod-label">十位</span>
+              <div class="rod-beam-dot"></div>
+              <div class="rod-pole"></div>
+              <div class="heaven-deck">
+                <div class="bead heaven-bead" data-rod="1" data-deck="heaven"></div>
+              </div>
+              <div class="earth-deck">
+                <div class="bead earth-bead" data-rod="1" data-deck="earth" data-idx="1"></div>
+                <div class="bead earth-bead" data-rod="1" data-deck="earth" data-idx="2"></div>
+                <div class="bead earth-bead" data-rod="1" data-deck="earth" data-idx="3"></div>
+                <div class="bead earth-bead" data-rod="1" data-deck="earth" data-idx="4"></div>
+              </div>
+            </div>
+
+            <!-- 個位檔 (rod 0) -->
+            <div class="abacus-rod" data-rod="0">
+              <span class="rod-label">個位</span>
+              <div class="rod-beam-dot"></div>
+              <div class="rod-pole"></div>
+              <div class="heaven-deck">
+                <div class="bead heaven-bead" data-rod="0" data-deck="heaven"></div>
+              </div>
+              <div class="earth-deck">
+                <div class="bead earth-bead" data-rod="0" data-deck="earth" data-idx="1"></div>
+                <div class="bead earth-bead" data-rod="0" data-deck="earth" data-idx="2"></div>
+                <div class="bead earth-bead" data-rod="0" data-deck="earth" data-idx="3"></div>
+                <div class="bead earth-bead" data-rod="0" data-deck="earth" data-idx="4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 數字鍵盤 -->
+      <div class="keypad" id="keypad">
+        <button class="key-btn" data-key="1">1</button>
+        <button class="key-btn" data-key="2">2</button>
+        <button class="key-btn" data-key="3">3</button>
+        <button class="key-btn" data-key="4">4</button>
+        <button class="key-btn" data-key="5">5</button>
+        <button class="key-btn" data-key="6">6</button>
+        <button class="key-btn" data-key="7">7</button>
+        <button class="key-btn" data-key="8">8</button>
+        <button class="key-btn" data-key="9">9</button>
+        <button class="key-btn action-clear" data-key="clear">清除</button>
+        <button class="key-btn" data-key="0">0</button>
+        <button class="key-btn action-back" data-key="back">⌫</button>
+      </div>
+
+      <div class="game-footer">
+        <span id="footerTipText">💡 點擊算珠即可上下撥動，閃爍藍光的算珠為提示</span>
+        <button id="quitBtn" class="quit-btn">返回設定</button>
+      </div>
+    </div>
+
+    <!-- 畫面 3：結算畫面 -->
+    <div id="resultScreen" class="screen">
+      <div class="result-hero">
+        <span id="newRecordBadge" class="result-badge">🎉 練習完成</span>
+        <div class="result-title" id="resultTitle">撥珠越來越熟練囉！</div>
+        <div class="result-score-big" id="resultMainStat">10</div>
+        <div class="result-score-unit" id="resultMainUnit">完成題數</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">平均每題耗時</div>
+          <div class="stat-box-val" id="statAvgTime">2.5 秒</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">最高連續完成</div>
+          <div class="stat-box-val" id="statMaxStreak">10 🔥</div>
+        </div>
+      </div>
+
+      <div class="history-box">
+        <div class="history-title">本局練習回顧</div>
+        <div id="historyChips" class="history-chips"></div>
+      </div>
+
+      <div class="result-actions">
+        <button id="backHomeBtn" class="secondary-btn">調整設定</button>
+        <button id="retryBtn" class="primary-btn">再練一次 ↻</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== 音效合成器 ======
+    class SoundEffects {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, delay = 0, gainVal = 0.12) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      beadClick() {
+        this.playTone(920, 'triangle', 0.045, 0, 0.15);
+        this.playTone(420, 'sine', 0.03, 0.01, 0.1);
+      }
+
+      stepDone() {
+        this.playTone(659.25, 'sine', 0.09, 0, 0.11);
+      }
+
+      correct() {
+        this.playTone(587.33, 'sine', 0.1, 0, 0.12);
+        this.playTone(880, 'sine', 0.18, 0.07, 0.14);
+      }
+
+      wrong() {
+        this.playTone(220, 'triangle', 0.15, 0, 0.15);
+        this.playTone(174.61, 'triangle', 0.2, 0.08, 0.15);
+      }
+
+      finish() {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => this.playTone(n, 'sine', 0.22, idx * 0.08, 0.14));
+      }
+    }
+
+    const sfx = new SoundEffects();
+
+    const PLACE_NAMES = ['個位', '十位', '百位', '千位'];
+
+    // ====== 四檔算盤狀態管理 (rod 0: 個位, 1: 十位, 2: 百位, 3: 千位) ======
+    const abacus = {
+      activeRods: 1, // 1 ~ 4 檔
+      rods: [
+        { heaven: false, earth: 0 }, // 0: 個位
+        { heaven: false, earth: 0 }, // 1: 十位
+        { heaven: false, earth: 0 }, // 2: 百位
+        { heaven: false, earth: 0 }  // 3: 千位
+      ],
+
+      setActiveRods(count) {
+        this.activeRods = count;
+        const inner = document.getElementById('abacusInner');
+        inner.className = `abacus-inner cols-${count}`;
+        for (let r = 0; r < 4; r++) {
+          const rodEl = document.querySelector(`.abacus-rod[data-rod="${r}"]`);
+          if (rodEl) {
+            rodEl.classList.toggle('hidden', r >= count);
+          }
+        }
+      },
+
+      reset() {
+        for (let r = 0; r < 4; r++) {
+          this.rods[r].heaven = false;
+          this.rods[r].earth = 0;
+        }
+        this.render();
+      },
+
+      getRodDigit(r) {
+        return (this.rods[r].heaven ? 5 : 0) + this.rods[r].earth;
+      },
+
+      getValue() {
+        let total = 0;
+        for (let r = 0; r < 4; r++) {
+          total += this.getRodDigit(r) * Math.pow(10, r);
+        }
+        return total;
+      },
+
+      setValue(num) {
+        const clamped = Math.max(0, Math.min(9999, num));
+        for (let r = 0; r < 4; r++) {
+          const d = Math.floor(clamped / Math.pow(10, r)) % 10;
+          this.rods[r].heaven = d >= 5;
+          this.rods[r].earth = d % 5;
+        }
+        this.render();
+      },
+
+      render() {
+        for (let r = 0; r < 4; r++) {
+          const rodState = this.rods[r];
+          const heavenBead = document.querySelector(`.bead.heaven-bead[data-rod="${r}"]`);
+          if (heavenBead) {
+            heavenBead.classList.toggle('active', rodState.heaven);
+          }
+          const earthBeads = document.querySelectorAll(`.bead.earth-bead[data-rod="${r}"]`);
+          earthBeads.forEach(bead => {
+            const idx = parseInt(bead.dataset.idx, 10);
+            bead.classList.toggle('active', idx <= rodState.earth);
+          });
+        }
+
+        document.getElementById('abacusValueDisplay').textContent = this.getValue();
+        updateVisualGuides();
+      }
+    };
+
+    // ====== 遊戲狀態設定 ======
+    const state = {
+      mainCategory: 'basic',     // 'basic' (基礎撥珠/識數) | 'calc' (進階加減法)
+      basicType: 'set_beads',    // 'set_beads' (看數撥珠) | 'read_beads' (看盤認數)
+      basicDigits: 1,            // 1 (個位) | 2 (十位) | 3 (百位) | 4 (千位)
+      playStyle: 'step_abacus',  // 'step_abacus' | 'direct_abacus' | 'mental_keypad'
+      lesson: 'all',             // 'all' | 'direct' | 'five' | 'ten'
+      opType: 'mix',             // 'add' | 'sub' | 'mix'
+      mode: 'count10',           // 'count10' | 'timed60'
+      isPlaying: false,
+      abacusStep: 1,
+      currentQuestion: null,
+      currentInput: '',
+      correctCount: 0,
+      streak: 0,
+      maxStreak: 0,
+      startTimeMs: 0,
+      elapsedMs: 0,
+      remainingMs: 60000,
+      totalTimeMs: 60000,
+      targetCount: 10,
+      timerId: null,
+      lastQuestionKey: '',
+      history: []
+    };
+
+    // ====== 珠心算口訣解析引擎 (用於進階加減法) ======
+    function analyzeAbacusFormula(a, b, op) {
+      const aHeaven = a >= 5 ? 1 : 0;
+      const aEarth = a % 5;
+
+      if (op === 'add') {
+        const ans = a + b;
+        if (ans >= 10) {
+          const comp10 = 10 - b;
+          if (aEarth < comp10 && aHeaven === 1) {
+            const addFiveComp = 5 - comp10;
+            return {
+              category: 'ten',
+              tag: '破五進十',
+              hint: `口訣：加 ${b} ＝ 減 ${comp10} 進 10（個位用「上 ${addFiveComp} 去五進一」！）`
+            };
+          }
+          return {
+            category: 'ten',
+            tag: '湊十進位',
+            hint: `口訣：加 ${b} ＝ 去 ${comp10} 進一（個位撥去 ${comp10}，十位撥上 1 顆下珠 +10）`
+          };
+        }
+        if (b < 5 && aEarth + b >= 5 && aHeaven === 0) {
+          const comp5 = 5 - b;
+          return {
+            category: 'five',
+            tag: '湊五加法',
+            hint: `口訣：加 ${b} ＝ 下五去 ${comp5}（撥下上珠 5，再撥去下珠 ${comp5}）`
+          };
+        }
+        if (b === 5) {
+          return { category: 'direct', tag: '五珠直加', hint: `指法：直接將個位的「上珠 5」往下撥靠樑` };
+        } else if (b > 5) {
+          return { category: 'direct', tag: '同上同下', hint: `指法：加 ${b} ＝ 同時撥下「上珠 5」與撥上「${b - 5} 顆下珠」` };
+        } else {
+          return { category: 'direct', tag: '直加指法', hint: `指法：直接在個位往上多撥 ${b} 顆下珠靠樑` };
+        }
+      } else {
+        if (b < 5 && aEarth < b && aHeaven === 1) {
+          const comp5 = 5 - b;
+          return {
+            category: 'five',
+            tag: '破五減法',
+            hint: `口訣：減 ${b} ＝ 上 ${comp5} 去五（先撥上 ${comp5} 顆下珠，再撥去上珠 5）`
+          };
+        }
+        if (b === 5) {
+          return { category: 'direct', tag: '五珠直減', hint: `指法：直接將個位的「上珠 5」往上撥離橫樑` };
+        } else if (b > 5) {
+          return { category: 'direct', tag: '雙分直減', hint: `指法：減 ${b} ＝ 同時撥去「上珠 5」與「${b - 5} 顆下珠」` };
+        } else {
+          return { category: 'direct', tag: '直減指法', hint: `指法：直接在個位往下撥去 ${b} 顆下珠` };
+        }
+      }
+    }
+
+    // 說明單一位數 (0~9) 如何用上珠與下珠組成
+    function describeSingleDigitBeads(d, placeLabel) {
+      if (d === 0) return `${placeLabel} 0（不撥珠）`;
+      if (d < 5) return `${placeLabel} ${d}（下珠 ${d} 顆往上）`;
+      if (d === 5) return `${placeLabel} 5（上珠 5 往下）`;
+      return `${placeLabel} ${d}（上珠 5 ＋ 下珠 ${d - 5} 顆）`;
+    }
+
+    // ====== 視覺引導：位數完成標記與閃爍提示珠 ======
+    function updateVisualGuides() {
+      document.querySelectorAll('.bead').forEach(b => b.classList.remove('hint-pulse'));
+      document.querySelectorAll('.abacus-rod').forEach(r => r.classList.remove('rod-matched'));
+
+      if (!state.isPlaying || !state.currentQuestion) return;
+
+      // 看算盤認數字模式：不閃爍提示珠，也不顯示目前算盤總和避免劇透
+      if (state.mainCategory === 'basic' && state.basicType === 'read_beads') {
+        return;
+      }
+
+      let targetVal = state.currentQuestion.answer;
+      if (state.mainCategory === 'calc' && state.playStyle === 'step_abacus' && state.abacusStep === 1) {
+        targetVal = state.currentQuestion.a;
+      }
+
+      // 從最高位檔往個位檔檢查，標記已正確的檔位，並對尚未正確的最高檔位給予藍光閃爍引導
+      let firstUnmatchedRod = -1;
+
+      for (let r = abacus.activeRods - 1; r >= 0; r--) {
+        const expectedDigit = Math.floor(targetVal / Math.pow(10, r)) % 10;
+        const currentDigit = abacus.getRodDigit(r);
+        const rodEl = document.querySelector(`.abacus-rod[data-rod="${r}"]`);
+        const digitCardEl = document.querySelector(`.digit-card[data-rod="${r}"]`);
+
+        if (currentDigit === expectedDigit) {
+          if (rodEl) rodEl.classList.add('rod-matched');
+          if (digitCardEl) digitCardEl.classList.add('matched');
+        } else {
+          if (digitCardEl) digitCardEl.classList.remove('matched');
+          if (firstUnmatchedRod === -1) {
+            firstUnmatchedRod = r;
+          }
+        }
+      }
+
+      // 對第一個尚未撥對的檔位閃爍提示珠，並更新文字引導
+      if (firstUnmatchedRod !== -1) {
+        const r = firstUnmatchedRod;
+        const expectedDigit = Math.floor(targetVal / Math.pow(10, r)) % 10;
+        const wantHeaven = expectedDigit >= 5;
+        const wantEarth = expectedDigit % 5;
+
+        if (abacus.rods[r].heaven !== wantHeaven) {
+          const hb = document.querySelector(`.bead.heaven-bead[data-rod="${r}"]`);
+          if (hb) hb.classList.add('hint-pulse');
+        }
+        if (abacus.rods[r].earth !== wantEarth) {
+          const targetIdx = wantEarth > abacus.rods[r].earth
+            ? wantEarth
+            : abacus.rods[r].earth + 1;
+          const eb = document.querySelector(`.bead.earth-bead[data-rod="${r}"][data-idx="${targetIdx}"]`);
+          if (eb) eb.classList.add('hint-pulse');
+        }
+
+        // 若為基礎看數撥珠模式，動態提示目前該撥哪一檔
+        if (state.mainCategory === 'basic' && state.basicType === 'set_beads') {
+          document.getElementById('formulaHintText').textContent =
+            `💡 指法提示：請撥【${ describeSingleDigitBeads(expectedDigit, PLACE_NAMES[r]) }】`;
+        }
+      }
+    }
+
+    // ====== 題目產生器 ======
+    function generateQuestion() {
+      state.currentInput = '';
+
+      if (state.mainCategory === 'basic') {
+        generateBasicQuestion();
+      } else {
+        generateCalcQuestion();
+      }
+    }
+
+    // 產生「基礎撥珠 / 看盤識數」題目
+    function generateBasicQuestion() {
+      const d = Number(state.basicDigits); // 1 ~ 4 位數
+      const minVal = d === 1 ? 1 : Math.pow(10, d - 1);
+      const maxVal = Math.pow(10, d) - 1;
+
+      let target;
+      let attempts = 0;
+      do {
+        target = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+        attempts++;
+      } while (String(target) === state.lastQuestionKey && attempts < 10);
+
+      state.lastQuestionKey = String(target);
+      state.currentQuestion = {
+        answer: target,
+        tag: `${PLACE_NAMES[d - 1]}練習`
+      };
+
+      const basicTargetArea = document.getElementById('basicTargetArea');
+      const equationArea = document.getElementById('equationArea');
+      const readoutBox = document.getElementById('abacusReadoutBox');
+      const resetBtn = document.getElementById('resetAbacusBtn');
+      const wrapper = document.getElementById('abacusWrapper');
+
+      document.getElementById('formulaCategoryTag').textContent = state.currentQuestion.tag;
+
+      if (state.basicType === 'set_beads') {
+        // 模式 A：看數字撥算盤
+        wrapper.classList.remove('readonly');
+        readoutBox.classList.remove('hidden');
+        resetBtn.classList.remove('hidden');
+        basicTargetArea.classList.remove('hidden');
+        equationArea.classList.add('hidden');
+
+        // 渲染每位數拆解卡片（由左至右：高位到個位）
+        basicTargetArea.innerHTML = '';
+        for (let r = d - 1; r >= 0; r--) {
+          const digitVal = Math.floor(target / Math.pow(10, r)) % 10;
+          const card = document.createElement('div');
+          card.className = 'digit-card';
+          card.dataset.rod = r;
+          card.innerHTML = `
+            <span class="digit-card-place">${PLACE_NAMES[r]}</span>
+            <span class="digit-card-num">${digitVal}</span>
+          `;
+          basicTargetArea.appendChild(card);
+        }
+
+        document.getElementById('stepGuideText').textContent =
+          `👉 請在算盤撥出「${target}」（由高位往個位撥）`;
+        abacus.reset();
+      } else {
+        // 模式 B：看算盤認數字
+        wrapper.classList.add('readonly');
+        readoutBox.classList.add('hidden');
+        resetBtn.classList.add('hidden');
+        basicTargetArea.classList.add('hidden');
+        equationArea.classList.remove('hidden');
+
+        document.getElementById('numA').textContent = '算盤代表多少';
+        document.getElementById('opSign').textContent = '';
+        document.getElementById('numB').textContent = '';
+        document.getElementById('eqSign').textContent = '＝';
+        renderAnswerSlot();
+
+        document.getElementById('stepGuideText').textContent =
+          `👉 請觀察下方算盤的珠子，輸入正確的數字！`;
+        document.getElementById('formulaHintText').textContent =
+          `💡 讀盤技巧：靠樑的上珠算 5、下珠每顆算 1，從左到右依序讀出位數`;
+        abacus.setValue(target);
+      }
+    }
+
+    // 產生「進階加減法」題目
+    function buildCalcQuestionPool() {
+      const pool = [];
+      const ops = state.opType === 'mix' ? ['add', 'sub'] : [state.opType];
+
+      ops.forEach(op => {
+        for (let a = 1; a <= 9; a++) {
+          for (let b = 1; b <= 9; b++) {
+            if (op === 'sub' && a < b) continue;
+            const formula = analyzeAbacusFormula(a, b, op);
+            if (state.lesson === 'all' || formula.category === state.lesson) {
+              pool.push({
+                a, b, op,
+                sign: op === 'add' ? '+' : '−',
+                answer: op === 'add' ? a + b : a - b,
+                formula
+              });
+            }
+          }
+        }
+      });
+
+      if (pool.length === 0) {
+        for (let a = 1; a <= 9; a++) {
+          for (let b = 1; b <= a; b++) {
+            const formula = analyzeAbacusFormula(a, b, 'sub');
+            pool.push({ a, b, op: 'sub', sign: '−', answer: a - b, formula });
+          }
+        }
+      }
+      return pool;
+    }
+
+    function generateCalcQuestion() {
+      const pool = buildCalcQuestionPool();
+      let chosen;
+      let attempts = 0;
+      do {
+        chosen = pool[Math.floor(Math.random() * pool.length)];
+        attempts++;
+      } while (`${chosen.a}${chosen.sign}${chosen.b}` === state.lastQuestionKey && pool.length > 1 && attempts < 10);
+
+      state.lastQuestionKey = `${chosen.a}${chosen.sign}${chosen.b}`;
+      state.currentQuestion = chosen;
+      state.abacusStep = state.playStyle === 'step_abacus' ? 1 : 2;
+
+      document.getElementById('abacusWrapper').classList.remove('readonly');
+      document.getElementById('abacusReadoutBox').classList.remove('hidden');
+      document.getElementById('resetAbacusBtn').classList.remove('hidden');
+      document.getElementById('basicTargetArea').classList.add('hidden');
+      document.getElementById('equationArea').classList.remove('hidden');
+
+      document.getElementById('numA').textContent = chosen.a;
+      document.getElementById('opSign').textContent = chosen.sign;
+      document.getElementById('numB').textContent = chosen.b;
+      document.getElementById('eqSign').textContent = '=';
+      document.getElementById('formulaCategoryTag').textContent = chosen.formula.tag;
+
+      abacus.reset();
+      updateCalcStepUI();
+      renderAnswerSlot();
+      updateVisualGuides();
+    }
+
+    function updateCalcStepUI() {
+      const q = state.currentQuestion;
+      const numAEl = document.getElementById('numA');
+      const numBEl = document.getElementById('numB');
+      const stepGuideText = document.getElementById('stepGuideText');
+      const formulaHintText = document.getElementById('formulaHintText');
+
+      numAEl.classList.remove('active-step');
+      numBEl.classList.remove('active-step');
+
+      if (state.playStyle === 'step_abacus') {
+        if (state.abacusStep === 1) {
+          numAEl.classList.add('active-step');
+          stepGuideText.textContent = `👉 步驟 1：請先在個位撥出「${q.a}」`;
+          formulaHintText.textContent = `💡 定位練習：${describeSingleDigitBeads(q.a, '個位')}`;
+        } else {
+          numBEl.classList.add('active-step');
+          stepGuideText.textContent = `👉 步驟 2：接著撥「${q.sign} ${q.b}」算出答案！`;
+          formulaHintText.textContent = `💡 ${q.formula.hint}`;
+        }
+      } else if (state.playStyle === 'direct_abacus') {
+        stepGuideText.textContent = `👉 請在算盤撥出「${q.a} ${q.sign} ${q.b}」的答案（或按數字鍵）`;
+        formulaHintText.textContent = `💡 ${q.formula.hint}`;
+      } else {
+        stepGuideText.textContent = `👉 心算挑戰：想像算盤撥珠，按下正確答案！`;
+        formulaHintText.textContent = `💡 ${q.formula.hint}`;
+      }
+    }
+
+    function renderAnswerSlot() {
+      const slot = document.getElementById('answerSlot');
+      if (state.currentInput === '') {
+        slot.textContent = '';
+        slot.classList.add('empty');
+      } else {
+        slot.textContent = state.currentInput;
+        slot.classList.remove('empty');
+      }
+    }
+
+    // ====== 當使用者撥動算珠時的判定 ======
+    function onAbacusChanged() {
+      if (!state.isPlaying || !state.currentQuestion) return;
+      const val = abacus.getValue();
+      const q = state.currentQuestion;
+
+      if (state.mainCategory === 'basic') {
+        if (state.basicType === 'set_beads' && val === q.answer) {
+          setTimeout(() => completeCurrentQuestion(), 200);
+        }
+      } else {
+        if (state.playStyle === 'step_abacus') {
+          if (state.abacusStep === 1 && val === q.a) {
+            sfx.stepDone();
+            state.abacusStep = 2;
+            showFeedback(`已撥出 ${q.a}！`, true);
+            updateCalcStepUI();
+            updateVisualGuides();
+          } else if (state.abacusStep === 2 && val === q.answer) {
+            state.currentInput = String(val);
+            renderAnswerSlot();
+            setTimeout(() => completeCurrentQuestion(), 200);
+          }
+        } else if (state.playStyle === 'direct_abacus') {
+          if (val === q.answer) {
+            state.currentInput = String(val);
+            renderAnswerSlot();
+            setTimeout(() => completeCurrentQuestion(), 200);
+          }
+        }
+      }
+    }
+
+    // 點擊算珠事件
+    document.getElementById('abacusWrapper').addEventListener('click', (e) => {
+      const bead = e.target.closest('.bead');
+      if (!bead || !state.isPlaying) return;
+      if (state.mainCategory === 'basic' && state.basicType === 'read_beads') return; // 讀盤模式禁止撥珠
+
+      const r = parseInt(bead.dataset.rod, 10);
+      const deck = bead.dataset.deck;
+
+      sfx.beadClick();
+
+      if (deck === 'heaven') {
+        abacus.rods[r].heaven = !abacus.rods[r].heaven;
+      } else {
+        const idx = parseInt(bead.dataset.idx, 10);
+        if (idx > abacus.rods[r].earth) {
+          abacus.rods[r].earth = idx;
+        } else {
+          abacus.rods[r].earth = idx - 1;
+        }
+      }
+
+      abacus.render();
+      onAbacusChanged();
+    });
+
+    document.getElementById('resetAbacusBtn').addEventListener('click', () => {
+      if (state.mainCategory === 'basic' && state.basicType === 'read_beads') return;
+      sfx.beadClick();
+      abacus.reset();
+    });
+
+    // ====== 數字鍵盤輸入處理 ======
+    function handleDigitInput(digitStr) {
+      if (!state.isPlaying || !state.currentQuestion) return;
+
+      const expectedStr = String(state.currentQuestion.answer);
+      const nextInput = state.currentInput + digitStr;
+      if (nextInput.length > expectedStr.length) return;
+
+      state.currentInput = nextInput;
+      renderAnswerSlot();
+
+      // 完全相符 -> 過關
+      if (nextInput === expectedStr) {
+        if (state.mainCategory === 'calc') {
+          abacus.setValue(state.currentQuestion.answer);
+        }
+        completeCurrentQuestion();
+        return;
+      }
+
+      // 前綴相符 -> 繼續等待下一位數字輸入
+      if (expectedStr.startsWith(nextInput)) {
+        return;
+      }
+
+      // 輸入錯誤
+      sfx.wrong();
+      state.streak = 0;
+      updateHud();
+      showFeedback('再看仔細一點喔！', false);
+      setTimeout(() => {
+        if (state.isPlaying) {
+          state.currentInput = '';
+          renderAnswerSlot();
+        }
+      }, 240);
+    }
+
+    function completeCurrentQuestion() {
+      if (!state.isPlaying) return;
+      sfx.correct();
+      state.correctCount++;
+      state.streak++;
+      if (state.streak > state.maxStreak) {
+        state.maxStreak = state.streak;
+      }
+
+      const q = state.currentQuestion;
+      if (state.mainCategory === 'basic') {
+        state.history.push({ text: `撥珠 ${q.answer} (${q.tag})` });
+      } else {
+        state.history.push({ text: `${q.a} ${q.sign} ${q.b} = ${q.answer} (${q.formula.tag})` });
+      }
+
+      showFeedback('太棒了！🎉', true);
+      updateHud();
+
+      if (state.mode === 'count10' && state.correctCount >= state.targetCount) {
+        endGame();
+        return;
+      }
+
+      generateQuestion();
+    }
+
+    function showFeedback(text, isGood) {
+      const pill = document.getElementById('feedbackPill');
+      const card = document.getElementById('questionCard');
+      pill.textContent = text;
+      pill.className = `feedback-pill show ${isGood ? 'good' : 'bad'}`;
+      card.classList.remove('correct-flash', 'wrong-shake');
+      void card.offsetWidth;
+      card.classList.add(isGood ? 'correct-flash' : 'wrong-shake');
+
+      clearTimeout(showFeedback.timer);
+      showFeedback.timer = setTimeout(() => {
+        pill.classList.remove('show');
+        card.classList.remove('correct-flash', 'wrong-shake');
+      }, 420);
+    }
+
+    // ====== 最佳紀錄存取 ======
+    function getRecordKey() {
+      if (state.mainCategory === 'basic') {
+        return `abacus_basic_${state.basicType}_d${state.basicDigits}_${state.mode}`;
+      }
+      return `abacus_calc_${state.playStyle}_${state.lesson}_${state.opType}_${state.mode}`;
+    }
+
+    function loadBestRecord() {
+      const raw = localStorage.getItem(getRecordKey());
+      return raw ? parseFloat(raw) : null;
+    }
+
+    function formatBestRecord(val) {
+      if (val === null || Number.isNaN(val)) return '尚無紀錄';
+      return state.mode === 'timed60' ? `${val} 題` : `${val.toFixed(1)} 秒`;
+    }
+
+    function updateBestRecordPreview() {
+      document.getElementById('bestRecordValue').textContent = formatBestRecord(loadBestRecord());
+    }
+
+    // ====== 遊戲流程控制 ======
+    const screens = {
+      start: document.getElementById('startScreen'),
+      game: document.getElementById('gameScreen'),
+      result: document.getElementById('resultScreen')
+    };
+
+    function switchScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    function startGame() {
+      sfx.init();
+      state.isPlaying = true;
+      state.correctCount = 0;
+      state.streak = 0;
+      state.maxStreak = 0;
+      state.history = [];
+      state.lastQuestionKey = '';
+      state.totalTimeMs = 60000;
+      state.remainingMs = 60000;
+      state.targetCount = 10;
+
+      const keypadEl = document.getElementById('keypad');
+      const footerTipEl = document.getElementById('footerTipText');
+
+      if (state.mainCategory === 'basic') {
+        abacus.setActiveRods(Number(state.basicDigits));
+        if (state.basicType === 'set_beads') {
+          keypadEl.classList.add('hidden');
+          footerTipEl.textContent = '💡 點擊算珠上下撥動（閃爍藍光的算珠為提示）';
+        } else {
+          keypadEl.classList.remove('hidden', 'compact');
+          footerTipEl.textContent = '💡 看算盤上的珠子代表多少，直接按數字鍵作答';
+        }
+      } else {
+        abacus.setActiveRods(2); // 個位數加減法使用 2 檔（十位、個位）
+        if (state.playStyle === 'step_abacus') {
+          keypadEl.classList.add('hidden');
+          footerTipEl.textContent = '💡 點擊算珠上下撥動（閃爍藍光的算珠為提示）';
+        } else if (state.playStyle === 'direct_abacus') {
+          keypadEl.classList.remove('hidden');
+          keypadEl.classList.add('compact');
+          footerTipEl.textContent = '💡 可直接撥算盤過關，或點擊下方數字鍵作答';
+        } else {
+          keypadEl.classList.remove('hidden', 'compact');
+          footerTipEl.textContent = '💡 可搭配算盤輔助，直接按鍵盤數字極速作答';
+        }
+      }
+
+      state.startTimeMs = performance.now();
+      state.elapsedMs = 0;
+
+      switchScreen('game');
+      generateQuestion();
+      updateHud();
+
+      clearInterval(state.timerId);
+      state.timerId = setInterval(() => {
+        if (!state.isPlaying) return;
+        state.elapsedMs = performance.now() - state.startTimeMs;
+        if (state.mode === 'timed60') {
+          state.remainingMs = Math.max(0, state.totalTimeMs - state.elapsedMs);
+          updateHud();
+          if (state.remainingMs <= 0) endGame();
+        } else {
+          updateHud();
+        }
+      }, 100);
+    }
+
+    function updateHud() {
+      document.getElementById('hudStreakValue').textContent = `${state.streak} 🔥`;
+      const fill = document.getElementById('progressFill');
+
+      if (state.mode === 'timed60') {
+        document.getElementById('hudPrimaryLabel').textContent = '剩餘時間';
+        document.getElementById('hudPrimaryValue').textContent = `${Math.ceil(state.remainingMs / 1000)}s`;
+        document.getElementById('hudSecondaryLabel').textContent = '完成題數';
+        document.getElementById('hudSecondaryValue').textContent = `${state.correctCount}`;
+        fill.style.width = `${(state.remainingMs / state.totalTimeMs) * 100}%`;
+      } else {
+        document.getElementById('hudPrimaryLabel').textContent = '完成進度';
+        document.getElementById('hudPrimaryValue').textContent = `${state.correctCount} / ${state.targetCount}`;
+        document.getElementById('hudSecondaryLabel').textContent = '已用時間';
+        document.getElementById('hudSecondaryValue').textContent = `${(state.elapsedMs / 1000).toFixed(1)}s`;
+        fill.style.width = `${(state.correctCount / state.targetCount) * 100}%`;
+      }
+    }
+
+    function endGame() {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      sfx.finish();
+
+      const totalSec = state.elapsedMs / 1000;
+      const prevBest = loadBestRecord();
+
+      if (state.mode === 'timed60') {
+        if (state.correctCount > 0 && (prevBest === null || state.correctCount > prevBest)) {
+          localStorage.setItem(getRecordKey(), String(state.correctCount));
+        }
+        document.getElementById('resultMainStat').textContent = `${state.correctCount}`;
+        document.getElementById('resultMainUnit').textContent = '60 秒完成題數';
+      } else {
+        const val = Number(totalSec.toFixed(1));
+        if (state.correctCount >= state.targetCount && (prevBest === null || val < prevBest)) {
+          localStorage.setItem(getRecordKey(), String(val));
+        }
+        document.getElementById('resultMainStat').textContent = `${totalSec.toFixed(1)}s`;
+        document.getElementById('resultMainUnit').textContent = `完成 ${state.targetCount} 題總耗時`;
+      }
+
+      const avgSec = state.correctCount > 0 ? (totalSec / state.correctCount).toFixed(1) : '-';
+      document.getElementById('statAvgTime').textContent = avgSec === '-' ? '-' : `${avgSec} 秒`;
+      document.getElementById('statMaxStreak').textContent = `${state.maxStreak} 🔥`;
+
+      const container = document.getElementById('historyChips');
+      container.innerHTML = '';
+      state.history.forEach(item => {
+        const span = document.createElement('span');
+        span.className = 'history-chip';
+        span.textContent = item.text;
+        container.appendChild(span);
+      });
+
+      updateBestRecordPreview();
+      switchScreen('result');
+    }
+
+    // ====== 選單與按鍵事件綁定 ======
+    document.getElementById('mainCategoryTabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      document.querySelectorAll('#mainCategoryTabs .category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.mainCategory = tab.dataset.cat;
+
+      document.getElementById('basicConfigPanel').classList.toggle('hidden', state.mainCategory !== 'basic');
+      document.getElementById('calcConfigPanel').classList.toggle('hidden', state.mainCategory !== 'calc');
+      document.getElementById('startBtnText').textContent =
+        state.mainCategory === 'basic' ? '開始基礎撥珠練習' : '開始加減法珠心算';
+      updateBestRecordPreview();
+    });
+
+    function bindOptionSelector(containerId, stateProp, dataAttr) {
+      document.getElementById(containerId).addEventListener('click', (e) => {
+        const card = e.target.closest('.option-card');
+        if (!card) return;
+        document.querySelectorAll(`#${containerId} .option-card`).forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        state[stateProp] = card.dataset[dataAttr];
+        updateBestRecordPreview();
+      });
+    }
+
+    bindOptionSelector('basicTypeSelector', 'basicType', 'btype');
+    bindOptionSelector('basicDigitsSelector', 'basicDigits', 'digits');
+    bindOptionSelector('playStyleSelector', 'playStyle', 'style');
+    bindOptionSelector('lessonSelector', 'lesson', 'lesson');
+    bindOptionSelector('opSelector', 'opType', 'op');
+    bindOptionSelector('modeSelector', 'mode', 'mode');
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('retryBtn').addEventListener('click', startGame);
+    document.getElementById('backHomeBtn').addEventListener('click', () => switchScreen('start'));
+    document.getElementById('quitBtn').addEventListener('click', () => {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      switchScreen('start');
+    });
+
+    document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+      sfx.enabled = !sfx.enabled;
+      e.currentTarget.textContent = sfx.enabled ? '🔊' : '🔇';
+    });
+
+    document.getElementById('keypad').addEventListener('click', (e) => {
+      const btn = e.target.closest('.key-btn');
+      if (!btn) return;
+      const key = btn.dataset.key;
+      if (key === 'clear') {
+        state.currentInput = '';
+        renderAnswerSlot();
+      } else if (key === 'back') {
+        state.currentInput = state.currentInput.slice(0, -1);
+        renderAnswerSlot();
+      } else {
+        handleDigitInput(key);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!state.isPlaying) return;
+      if (e.key >= '0' && e.key <= '9') {
+        e.preventDefault();
+        handleDigitInput(e.key);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        state.currentInput = state.currentInput.slice(0, -1);
+        renderAnswerSlot();
+      } else if (e.key === 'Escape' || e.key === 'Delete') {
+        e.preventDefault();
+        state.currentInput = '';
+        renderAnswerSlot();
+      }
+    });
+
+    updateBestRecordPreview();
+  </script>
+</body>
+</html>
