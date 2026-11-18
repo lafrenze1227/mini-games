@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>繽紛拼圖小達人 - 3x3 / 4x4 / 5x5 互動拼圖</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #fdf4ff 0%, #eff6ff 50%, #f0fdf4 100%);
+      --card-bg: #ffffff;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --secondary: #10b981;
+      --secondary-light: #ecfdf5;
+      --accent: #f59e0b;
+      --accent-light: #fffbeb;
+      --danger: #ef4444;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 18px 20px;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+
+    /* 頂部列 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      box-shadow: 0 4px 10px rgba(236, 72, 153, 0.25);
+    }
+
+    .brand-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-main);
+      font-size: 1.02rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 首頁設定 */
+    .section-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #475569;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 10 張預設圖片畫廊 + 自選上傳 */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .pic-card {
+      border: 2.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px;
+      position: relative;
+    }
+
+    .pic-card:hover {
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+    }
+
+    .pic-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.18);
+    }
+
+    .pic-thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+      background: #e2e8f0;
+    }
+
+    .pic-name {
+      font-size: 0.68rem;
+      font-weight: 800;
+      margin-top: 4px;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .pic-card.selected .pic-name {
+      color: var(--primary);
+    }
+
+    .upload-btn-inline {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: 1px solid #c7d2fe;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .upload-btn-inline:hover {
+      background: #e0e7ff;
+    }
+
+    /* 難度選擇 */
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .option-card {
+      border: 2px solid var(--border);
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .option-card:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .option-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .option-title {
+      font-size: 0.95rem;
+      font-weight: 900;
+    }
+
+    .option-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .option-card.selected .option-desc {
+      color: #4338ca;
+    }
+
+    .best-record-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 9px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .best-record-label {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .best-record-value {
+      font-weight: 800;
+      color: #d97706;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-lg);
+      background: var(--primary);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.3);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .primary-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* ====== 遊戲進行畫面 ====== */
+    .hud-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .hud-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 7px 6px;
+      text-align: center;
+    }
+
+    .hud-label {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .hud-value {
+      font-size: 1.02rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-value.highlight { color: var(--primary); }
+    .hud-value.good { color: var(--secondary); }
+
+    /* 輔助工具列 (底圖浮水印、編號、偷看原圖) */
+    .assist-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .tool-btn {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .tool-btn:hover {
+      background: #f8fafc;
+    }
+
+    .tool-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* 拼圖棋盤外框 */
+    .board-container {
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 1 / 1;
+      margin: 0 auto 12px;
+      background: #1e293b;
+      border-radius: var(--radius-lg);
+      padding: 6px;
+      position: relative;
+      box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.25);
+      touch-action: none; /* 防止拖曳拼圖時手機畫面跟著捲動 */
+    }
+
+    /* 淡淡的背景底圖浮水印 */
+    .board-watermark {
+      position: absolute;
+      inset: 6px;
+      border-radius: 11px;
+      background-size: 100% 100%;
+      background-position: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 1;
+    }
+
+    .board-watermark.show {
+      opacity: 0.26;
+    }
+
+    /* 按住偷看完整原圖遮罩 */
+    .board-peek-overlay {
+      position: absolute;
+      inset: 6px;
+      border-radius: 11px;
+      background-size: 100% 100%;
+      background-position: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+      z-index: 25;
+      box-shadow: inset 0 0 0 3px var(--accent);
+    }
+
+    .board-peek-overlay.show {
+      opacity: 1;
+    }
+
+    /* 拼圖網格 */
+    .puzzle-grid {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      gap: 3px;
+      border-radius: 11px;
+      overflow: hidden;
+    }
+
+    .puzzle-grid.solved {
+      gap: 0px;
+    }
+
+    .puzzle-tile {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background-repeat: no-repeat;
+      border-radius: 6px;
+      cursor: grab;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, border-radius 0.25s ease;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+      overflow: hidden;
+    }
+
+    .puzzle-grid.solved .puzzle-tile {
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .puzzle-tile:active {
+      cursor: grabbing;
+    }
+
+    /* 點選第一塊準備交換的高亮狀態 */
+    .puzzle-tile.selected-tile {
+      box-shadow: inset 0 0 0 3.5px #f59e0b, 0 0 12px rgba(245, 158, 11, 0.6);
+      z-index: 8;
+      transform: scale(0.96);
+    }
+
+    /* 拖曳經過的目標格高亮狀態 */
+    .puzzle-tile.drop-target {
+      box-shadow: inset 0 0 0 3.5px #4f46e5;
+      filter: brightness(1.12);
+    }
+
+    /* 正在被拖曳的原格子半透明 */
+    .puzzle-tile.dragging-source {
+      opacity: 0.35;
+    }
+
+    /* 編號提示標籤 */
+    .tile-number {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 5px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      backdrop-filter: blur(2px);
+    }
+
+    .puzzle-grid.show-numbers .tile-number {
+      display: inline-flex;
+    }
+
+    .puzzle-tile.in-place .tile-number {
+      background: rgba(16, 185, 129, 0.88);
+    }
+
+    /* 跟隨手指/滑鼠移動的浮動拼圖塊 */
+    .drag-floating-clone {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      border-radius: 10px;
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.38), 0 0 0 3px #ffffff;
+      transform: translate(-50%, -50%) scale(1.06);
+      background-repeat: no-repeat;
+    }
+
+    .game-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .quit-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+
+    .quit-btn:hover {
+      background: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    /* 過關結算畫面 */
+    .result-hero {
+      text-align: center;
+      padding: 6px 0 14px;
+    }
+
+    .result-preview-img {
+      width: 150px;
+      height: 150px;
+      border-radius: 18px;
+      margin: 8px auto 12px;
+      display: block;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+      border: 3px solid #ffffff;
+      object-fit: cover;
+    }
+
+    .result-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: #d97706;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .result-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-box-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .stat-box-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      padding: 13px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 440px) {
+      .gallery-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+      }
+      .pic-name {
+        font-size: 0.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 頂部列 -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">🧩</div>
+        <div>
+          <div class="brand-title">繽紛拼圖小達人</div>
+          <div class="brand-subtitle">3x3 · 4x4 · 5x5 手指拖曳互動拼圖</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="./index.html" class="icon-btn" title="返回遊戲大廳">🏠</a>
+        <button id="soundToggleBtn" class="icon-btn" title="切換音效">🔊</button>
+      </div>
+    </div>
+
+    <!-- 畫面 1：首頁選圖與難度設定 -->
+    <div id="startScreen" class="screen active">
+      <div class="section-label">
+        <span>1. 選擇喜歡的圖案（共 10 款主題）</span>
+        <label class="upload-btn-inline">
+          <span>📷 上傳自己的照片</span>
+          <input type="file" id="customImgInput" accept="image/*" style="display:none;">
+        </label>
+      </div>
+
+      <div class="gallery-grid" id="galleryGrid"></div>
+
+      <div class="section-label">
+        <span>2. 選擇拼圖格數難度</span>
+      </div>
+      <div class="size-grid" id="sizeSelector">
+        <div class="option-card selected" data-size="3">
+          <span class="option-title">🌱 3 × 3</span>
+          <span class="option-desc">共 9 塊 (初學推薦)</span>
+        </div>
+        <div class="option-card" data-size="4">
+          <span class="option-title">⭐ 4 × 4</span>
+          <span class="option-desc">共 16 塊 (進階挑戰)</span>
+        </div>
+        <div class="option-card" data-size="5">
+          <span class="option-title">👑 5 × 5</span>
+          <span class="option-desc">共 25 塊 (拼圖大師)</span>
+        </div>
+      </div>
+
+      <div class="best-record-box">
+        <span class="best-record-label" id="bestRecordLabel">3 × 3 最快完成紀錄</span>
+        <span class="best-record-value" id="bestRecordValue">尚無紀錄</span>
+      </div>
+
+      <button id="startBtn" class="primary-btn">
+        <span>開始拼圖挑戰</span>
+        <span>▶</span>
+      </button>
+    </div>
+
+    <!-- 畫面 2：遊戲進行 -->
+    <div id="gameScreen" class="screen">
+      <div class="hud-bar">
+        <div class="hud-item">
+          <div class="hud-label">歸位進度</div>
+          <div class="hud-value good" id="hudProgress">0 / 9</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">移動步數</div>
+          <div class="hud-value highlight" id="hudMoves">0</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">已用時間</div>
+          <div class="hud-value" id="hudTime">0.0s</div>
+        </div>
+      </div>
+
+      <!-- 輔助工具列 -->
+      <div class="assist-toolbar">
+        <button id="toggleWatermarkBtn" class="tool-btn active" title="在棋盤底部顯示淡淡的原圖輔助對位">
+          <span>🖼️ 底圖浮水印：開</span>
+        </button>
+        <button id="toggleNumbersBtn" class="tool-btn" title="顯示每塊拼圖的順序編號">
+          <span>🔢 編號提示：關</span>
+        </button>
+        <button id="peekOriginalBtn" class="tool-btn" title="按住可偷看完整原圖">
+          <span>👀 按住看原圖</span>
+        </button>
+      </div>
+
+      <!-- 拼圖主棋盤 -->
+      <div class="board-container" id="boardContainer">
+        <div class="board-watermark show" id="boardWatermark"></div>
+        <div class="puzzle-grid" id="puzzleGrid"></div>
+        <div class="board-peek-overlay" id="boardPeekOverlay"></div>
+      </div>
+
+      <div class="game-footer">
+        <span>💡 用手指/滑鼠<b>拖曳拼圖</b>或<b>點兩塊拼圖</b>即可交換位置</span>
+        <button id="quitBtn" class="quit-btn">換圖 / 返回</button>
+      </div>
+    </div>
+
+    <!-- 畫面 3：過關結算 -->
+    <div id="resultScreen" class="screen">
+      <div class="result-hero">
+        <span id="resultBadge" class="result-badge">🎉 拼圖完成！</span>
+        <div class="result-title" id="resultTitle">太厲害了，完美還原！</div>
+        <img id="resultPreviewImg" class="result-preview-img" alt="完成作品">
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">完成耗時</div>
+          <div class="stat-box-val" id="statTime">15.2 秒</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">交換步數</div>
+          <div class="stat-box-val" id="statMoves">12 步</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="backHomeBtn" class="secondary-btn">換張圖玩</button>
+        <button id="nextPicBtn" class="primary-btn">下一張圖 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== 音效合成器 ======
+    class SoundEffects {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, delay = 0, gainVal = 0.12) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      pickup() {
+        this.playTone(440, 'sine', 0.05, 0, 0.08);
+      }
+
+      swap(matchedNewTile) {
+        if (matchedNewTile) {
+          this.playTone(587.33, 'sine', 0.08, 0, 0.12);
+          this.playTone(880, 'sine', 0.14, 0.05, 0.13);
+        } else {
+          this.playTone(520, 'triangle', 0.06, 0, 0.1);
+        }
+      }
+
+      win() {
+        const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+        notes.forEach((n, idx) => this.playTone(n, 'sine', 0.22, idx * 0.08, 0.14));
+      }
+    }
+
+    const sfx = new SoundEffects();
+
+    // ====== 10 張原創高解析度童趣向量插畫產生器 (600x600 SVG Data URI) ======
+    function svgToDataUrl(svgContent) {
+      const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">${svgContent}</svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(fullSvg);
+    }
+
+    const PRESET_PICTURES = [
+      {
+        id: 'lion',
+        name: '陽光小獅子',
+        svg: `
+          <defs>
+            <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#bae6fd"/>
+              <stop offset="100%" stop-color="#fef08a"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="600" fill="url(#bg1)"/>
+          <!-- 太陽與雲朵 -->
+          <circle cx="110" cy="110" r="55" fill="#facc15" stroke="#fb923c" stroke-width="8"/>
+          <g fill="#ffffff" opacity="0.92">
+            <circle cx="450" cy="110" r="35"/><circle cx="485" cy="110" r="42"/><circle cx="520" cy="115" r="30"/>
+            <circle cx="130" cy="220" r="28"/><circle cx="160" cy="215" r="34"/><circle cx="190" cy="222" r="25"/>
+          </g>
+          <!-- 草原與小花 -->
+          <ellipse cx="300" cy="560" rx="380" ry="150" fill="#4ade80"/>
+          <ellipse cx="300" cy="585" rx="340" ry="110" fill="#22c55e"/>
+          <!-- 獅子身體 -->
+          <rect x="230" y="360" width="140" height="150" rx="50" fill="#f59e0b" stroke="#92400e" stroke-width="8"/>
+          <ellipse cx="300" cy="435" rx="42" ry="52" fill="#fde68a"/>
+          <circle cx="245" cy="500" r="28" fill="#fbbf24" stroke="#92400e" stroke-width="8"/>
+          <circle cx="355" cy="500" r="28" fill="#fbbf24" stroke="#92400e" stroke-width="8"/>
+          <!-- 獅子鬃毛 -->
+          <g fill="#ea580c" stroke="#7c2d12" stroke-width="8">
+            <circle cx="300" cy="150" r="50"/><circle cx="380" cy="175" r="50"/><circle cx="425" cy="245" r="50"/>
+            <circle cx="415" cy="325" r="50"/><circle cx="355" cy="375" r="50"/><circle cx="245" cy="375" r="50"/>
+            <circle cx="185" cy="325" r="50"/><circle cx="175" cy="245" r="50"/><circle cx="220" cy="175" r="50"/>
+          </g>
+          <!-- 耳朵與臉 -->
+          <circle cx="220" cy="180" r="32" fill="#fbbf24" stroke="#7c2d12" stroke-width="8"/>
+          <circle cx="380" cy="180" r="32" fill="#fbbf24" stroke="#7c2d12" stroke-width="8"/>
+          <circle cx="300" cy="270" r="105" fill="#fbbf24" stroke="#7c2d12" stroke-width="8"/>
+          <!-- 眼睛與腮紅 -->
+          <circle cx="260" cy="255" r="14" fill="#1e293b"/><circle cx="255" cy="250" r="5" fill="#fff"/>
+          <circle cx="340" cy="255" r="14" fill="#1e293b"/><circle cx="335" cy="250" r="5" fill="#fff"/>
+          <ellipse cx="230" cy="285" rx="18" ry="10" fill="#f43f5e" opacity="0.6"/>
+          <ellipse cx="370" cy="285" rx="18" ry="10" fill="#f43f5e" opacity="0.6"/>
+          <!-- 鼻子與微笑 -->
+          <polygon points="282,275 318,275 300,298" fill="#7c2d12"/>
+          <path d="M275,310 Q300,330 325,310" fill="none" stroke="#7c2d12" stroke-width="7" stroke-linecap="round"/>
+          <!-- 彩虹小蝴蝶 -->
+          <circle cx="490" cy="480" r="18" fill="#f43f5e"/><circle cx="490" cy="480" r="8" fill="#facc15"/>
+          <circle cx="110" cy="490" r="18" fill="#a855f7"/><circle cx="110" cy="490" r="8" fill="#facc15"/>
+        `
+      },
+      {
+        id: 'space',
+        name: '太空小火箭',
+        svg: `
+          <rect width="600" height="600" fill="#0f172a"/>
+          <!-- 星星與星雲 -->
+          <circle cx="120" cy="100" r="8" fill="#fef08a"/><circle cx="480" cy="80" r="10" fill="#fde047"/>
+          <circle cx="520" cy="260" r="7" fill="#fff"/><circle cx="80" cy="300" r="9" fill="#bae6fd"/>
+          <circle cx="160" cy="520" r="8" fill="#fef08a"/><circle cx="510" cy="490" r="9" fill="#f9a8d4"/>
+          <!-- 土星 -->
+          <circle cx="135" cy="175" r="52" fill="#a855f7"/>
+          <ellipse cx="135" cy="175" rx="95" ry="22" fill="none" stroke="#fde047" stroke-width="12" transform="rotate(-20 135 175)"/>
+          <!-- 月球 -->
+          <circle cx="485" cy="435" r="72" fill="#facc15"/>
+          <circle cx="465" cy="410" r="15" fill="#eab308"/><circle cx="510" cy="455" r="20" fill="#eab308"/>
+          <!-- 火箭尾焰 -->
+          <polygon points="245,420 355,420 300,565" fill="#f97316"/>
+          <polygon points="265,420 335,420 300,520" fill="#facc15"/>
+          <!-- 火箭機翼 -->
+          <polygon points="210,330 145,440 230,420" fill="#ef4444" stroke="#ffffff" stroke-width="6"/>
+          <polygon points="390,330 455,440 370,420" fill="#ef4444" stroke="#ffffff" stroke-width="6"/>
+          <!-- 火箭主體 -->
+          <path d="M300,85 C375,165 395,290 380,420 L220,420 C205,290 225,165 300,85 Z" fill="#f8fafc" stroke="#334155" stroke-width="8"/>
+          <path d="M300,85 C340,128 362,175 370,210 L230,210 C238,175 260,128 300,85 Z" fill="#ef4444"/>
+          <!-- 火箭舷窗 -->
+          <circle cx="300" cy="295" r="48" fill="#38bdf8" stroke="#f59e0b" stroke-width="12"/>
+          <path d="M275,275 Q295,260 315,275" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        `
+      },
+      {
+        id: 'ocean',
+        name: '海底小鯨魚',
+        svg: `
+          <defs>
+            <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#0284c7"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="600" fill="url(#sea)"/>
+          <!-- 海底沙灘與水草 -->
+          <ellipse cx="300" cy="580" rx="360" ry="90" fill="#fde047"/>
+          <path d="M90,550 Q70,460 105,390 Q125,450 115,550" fill="#10b981"/>
+          <path d="M510,550 Q535,450 495,375 Q475,450 490,550" fill="#10b981"/>
+          <!-- 噴水愛心與水花 -->
+          <path d="M280,185 Q240,105 180,120" fill="none" stroke="#e0f2fe" stroke-width="12" stroke-linecap="round"/>
+          <path d="M295,185 Q335,105 395,120" fill="none" stroke="#e0f2fe" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="170" cy="120" r="14" fill="#e0f2fe"/><circle cx="405" cy="120" r="14" fill="#e0f2fe"/>
+          <!-- 藍色小鯨魚 -->
+          <path d="M120,330 C120,210 350,200 390,305 C435,305 475,265 505,230 C515,275 495,320 465,340 C495,355 515,390 500,420 C465,395 430,375 390,375 L140,375 C125,375 120,355 120,330 Z" fill="#6366f1" stroke="#1e1b4b" stroke-width="8"/>
+          <path d="M135,350 Q260,350 370,355 L360,375 L145,375 Z" fill="#e0e7ff"/>
+          <circle cx="205" cy="300" r="15" fill="#1e1b4b"/><circle cx="200" cy="295" r="5" fill="#fff"/>
+          <ellipse cx="235" cy="322" rx="16" ry="9" fill="#fb7185"/>
+          <!-- 小丑魚與海星 -->
+          <ellipse cx="180" cy="485" rx="38" ry="24" fill="#f97316" stroke="#fff" stroke-width="5"/>
+          <polygon points="215,485 240,465 240,505" fill="#f97316"/>
+          <circle cx="162" cy="480" r="5" fill="#000"/>
+          <circle cx="430" cy="520" r="32" fill="#f43f5e" stroke="#ffe4e6" stroke-width="6"/>
+        `
+      },
+      {
+        id: 'dino',
+        name: '快樂小恐龍',
+        svg: `
+          <rect width="600" height="600" fill="#dcfce7"/>
+          <!-- 遠山與火山雲 -->
+          <polygon points="40,460 190,220 340,460" fill="#86efac"/>
+          <polygon points="310,460 460,200 590,460" fill="#4ade80"/>
+          <rect y="450" width="600" height="150" fill="#22c55e"/>
+          <circle cx="480" cy="110" r="48" fill="#facc15"/>
+          <!-- 恐龍背刺 -->
+          <polygon points="310,140 355,165 315,190" fill="#f97316"/>
+          <polygon points="335,205 385,235 335,260" fill="#f97316"/>
+          <polygon points="345,275 395,305 345,335" fill="#f97316"/>
+          <!-- 恐龍身體與尾巴 -->
+          <path d="M210,170 C295,155 345,210 345,320 C345,380 420,410 490,395 C460,465 350,485 235,470 C175,460 165,390 195,310 L155,270 C125,245 140,180 210,170 Z" fill="#10b981" stroke="#064e3b" stroke-width="8"/>
+          <!-- 肚皮與眼睛 -->
+          <ellipse cx="255" cy="375" rx="45" ry="65" fill="#fef08a"/>
+          <circle cx="215" cy="215" r="15" fill="#064e3b"/><circle cx="210" cy="210" r="5" fill="#fff"/>
+          <ellipse cx="245" cy="238" rx="15" ry="9" fill="#fb7185"/>
+          <path d="M155,248 Q185,265 215,248" fill="none" stroke="#064e3b" stroke-width="6" stroke-linecap="round"/>
+          <!-- 恐龍蛋 -->
+          <ellipse cx="115" cy="465" rx="42" ry="54" fill="#fff" stroke="#064e3b" stroke-width="7"/>
+          <circle cx="105" cy="445" r="10" fill="#60a5fa"/><circle cx="130" cy="475" r="13" fill="#f472b6"/>
+        `
+      },
+      {
+        id: 'train',
+        name: '彩虹小火車',
+        svg: `
+          <rect width="600" height="600" fill="#e0f2fe"/>
+          <!-- 彩虹拱門 -->
+          <circle cx="300" cy="360" r="240" fill="none" stroke="#ef4444" stroke-width="22"/>
+          <circle cx="300" cy="360" r="218" fill="none" stroke="#f59e0b" stroke-width="22"/>
+          <circle cx="300" cy="360" r="196" fill="none" stroke="#facc15" stroke-width="22"/>
+          <circle cx="300" cy="360" r="174" fill="none" stroke="#22c55e" stroke-width="22"/>
+          <circle cx="300" cy="360" r="152" fill="none" stroke="#3b82f6" stroke-width="22"/>
+          <!-- 草地與鐵軌 -->
+          <rect y="440" width="600" height="160" fill="#4ade80"/>
+          <rect y="485" width="600" height="16" fill="#78350f"/>
+          <!-- 煙囪白煙 -->
+          <circle cx="185" cy="185" r="26" fill="#fff"/><circle cx="230" cy="150" r="34" fill="#fff"/><circle cx="290" cy="125" r="42" fill="#fff"/>
+          <!-- 火車頭 -->
+          <rect x="155" y="225" width="46" height="80" rx="10" fill="#f59e0b" stroke="#1e293b" stroke-width="7"/>
+          <rect x="130" y="290" width="190" height="145" rx="20" fill="#ef4444" stroke="#1e293b" stroke-width="8"/>
+          <rect x="300" y="220" width="165" height="215" rx="20" fill="#3b82f6" stroke="#1e293b" stroke-width="8"/>
+          <rect x="285" y="198" width="195" height="30" rx="12" fill="#facc15" stroke="#1e293b" stroke-width="7"/>
+          <!-- 駕駛窗 -->
+          <rect x="335" y="255" width="95" height="75" rx="14" fill="#bae6fd" stroke="#1e293b" stroke-width="7"/>
+          <!-- 車頭排障器與車輪 -->
+          <polygon points="130,375 75,445 130,445" fill="#facc15" stroke="#1e293b" stroke-width="7"/>
+          <circle cx="185" cy="450" r="44" fill="#334155" stroke="#facc15" stroke-width="10"/>
+          <circle cx="300" cy="450" r="44" fill="#334155" stroke="#facc15" stroke-width="10"/>
+          <circle cx="415" cy="450" r="44" fill="#334155" stroke="#facc15" stroke-width="10"/>
+        `
+      },
+      {
+        id: 'candy',
+        name: '甜點冰淇淋',
+        svg: `
+          <rect width="600" height="600" fill="#fdf2f8"/>
+          <!-- 背景彩色圓點 -->
+          <circle cx="100" cy="110" r="24" fill="#fbcfe8"/><circle cx="500" cy="120" r="30" fill="#bae6fd"/>
+          <circle cx="95" cy="470" r="28" fill="#fef08a"/><circle cx="510" cy="460" r="26" fill="#bbf7d0"/>
+          <!-- 甜筒餅乾 -->
+          <polygon points="195,330 405,330 300,555" fill="#f59e0b" stroke="#92400e" stroke-width="8"/>
+          <line x1="225" y1="330" x2="325" y2="500" stroke="#b45309" stroke-width="6"/>
+          <line x1="375" y1="330" x2="275" y2="500" stroke="#b45309" stroke-width="6"/>
+          <!-- 三球冰淇淋 -->
+          <circle cx="235" cy="295" r="80" fill="#a7f3d0" stroke="#065f46" stroke-width="7"/>
+          <circle cx="365" cy="295" r="80" fill="#fde047" stroke="#854d0e" stroke-width="7"/>
+          <circle cx="300" cy="205" r="88" fill="#f472b6" stroke="#831843" stroke-width="7"/>
+          <!-- 微笑表情 -->
+          <circle cx="270" cy="195" r="11" fill="#831843"/><circle cx="330" cy="195" r="11" fill="#831843"/>
+          <path d="M280,220 Q300,238 320,220" fill="none" stroke="#831843" stroke-width="6" stroke-linecap="round"/>
+          <!-- 頂端紅櫻桃 -->
+          <path d="M300,105 Q335,55 365,45" fill="none" stroke="#15803d" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="300" cy="110" r="32" fill="#ef4444" stroke="#7f1d1d" stroke-width="7"/>
+        `
+      },
+      {
+        id: 'castle',
+        name: '童話小城堡',
+        svg: `
+          <rect width="600" height="600" fill="#dbeafe"/>
+          <!-- 太陽與雲 -->
+          <circle cx="500" cy="100" r="48" fill="#facc15"/>
+          <ellipse cx="300" cy="555" rx="360" ry="110" fill="#4ade80"/>
+          <!-- 左右高塔 -->
+          <rect x="115" y="235" width="90" height="260" fill="#f472b6" stroke="#831843" stroke-width="7"/>
+          <polygon points="100,235 160,120 220,235" fill="#6366f1" stroke="#312e81" stroke-width="7"/>
+          <rect x="395" y="235" width="90" height="260" fill="#f472b6" stroke="#831843" stroke-width="7"/>
+          <polygon points="380,235 440,120 500,235" fill="#6366f1" stroke="#312e81" stroke-width="7"/>
+          <!-- 中央主堡 -->
+          <rect x="195" y="265" width="210" height="230" fill="#fef08a" stroke="#854d0e" stroke-width="7"/>
+          <polygon points="180,265 300,115 420,265" fill="#ec4899" stroke="#831843" stroke-width="7"/>
+          <!-- 旗幟與大門 -->
+          <line x1="300" y1="115" x2="300" y2="55" stroke="#831843" stroke-width="7"/>
+          <polygon points="300,55 365,75 300,95" fill="#facc15"/>
+          <path d="M250,495 L250,395 A50,50 0 0,1 350,395 L350,495 Z" fill="#b45309" stroke="#451a03" stroke-width="7"/>
+          <circle cx="300" cy="315" r="28" fill="#38bdf8" stroke="#854d0e" stroke-width="6"/>
+        `
+      },
+      {
+        id: 'panda',
+        name: '竹林小貓熊',
+        svg: `
+          <rect width="600" height="600" fill="#ecfccb"/>
+          <!-- 竹子裝飾 -->
+          <rect x="65" y="60" width="26" height="480" rx="8" fill="#16a34a"/>
+          <rect x="510" y="60" width="26" height="480" rx="8" fill="#16a34a"/>
+          <ellipse cx="115" cy="160" rx="32" ry="12" fill="#22c55e" transform="rotate(-25 115 160)"/>
+          <ellipse cx="480" cy="220" rx="32" ry="12" fill="#22c55e" transform="rotate(25 480 220)"/>
+          <ellipse cx="300" cy="555" rx="340" ry="90" fill="#84cc16"/>
+          <!-- 貓熊耳朵與手腳 -->
+          <circle cx="195" cy="155" r="46" fill="#1e293b"/>
+          <circle cx="405" cy="155" r="46" fill="#1e293b"/>
+          <ellipse cx="300" cy="425" rx="125" ry="105" fill="#ffffff" stroke="#1e293b" stroke-width="8"/>
+          <circle cx="195" cy="380" r="42" fill="#1e293b"/>
+          <circle cx="405" cy="380" r="42" fill="#1e293b"/>
+          <circle cx="225" cy="505" r="44" fill="#1e293b"/><circle cx="225" cy="505" r="20" fill="#f472b6"/>
+          <circle cx="375" cy="505" r="44" fill="#1e293b"/><circle cx="375" cy="505" r="20" fill="#f472b6"/>
+          <!-- 貓熊圓臉 -->
+          <circle cx="300" cy="260" r="120" fill="#ffffff" stroke="#1e293b" stroke-width="8"/>
+          <ellipse cx="245" cy="250" rx="34" ry="26" fill="#1e293b" transform="rotate(-15 245 250)"/>
+          <ellipse cx="355" cy="250" rx="34" ry="26" fill="#1e293b" transform="rotate(15 355 250)"/>
+          <circle cx="248" cy="245" r="9" fill="#ffffff"/><circle cx="352" cy="245" r="9" fill="#ffffff"/>
+          <ellipse cx="300" cy="282" rx="18" ry="12" fill="#1e293b"/>
+          <ellipse cx="205" cy="285" rx="18" ry="10" fill="#fb7185"/>
+          <ellipse cx="395" cy="285" rx="18" ry="10" fill="#fb7185"/>
+          <path d="M278,305 Q300,325 322,305" fill="none" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+        `
+      },
+      {
+        id: 'balloon',
+        name: '繽紛熱氣球',
+        svg: `
+          <defs>
+            <linearGradient id="sky9" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7dd3fc"/>
+              <stop offset="100%" stop-color="#fef9c3"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="600" fill="url(#sky9)"/>
+          <!-- 雲朵 -->
+          <g fill="#ffffff">
+            <circle cx="110" cy="180" r="35"/><circle cx="145" cy="175" r="42"/><circle cx="180" cy="185" r="30"/>
+            <circle cx="440" cy="340" r="35"/><circle cx="475" cy="335" r="42"/><circle cx="510" cy="345" r="30"/>
+          </g>
+          <!-- 吊籃繩索与藤籃 -->
+          <line x1="255" y1="395" x2="270" y2="465" stroke="#78350f" stroke-width="6"/>
+          <line x1="345" y1="395" x2="330" y2="465" stroke="#78350f" stroke-width="6"/>
+          <rect x="250" y="460" width="100" height="75" rx="16" fill="#d97706" stroke="#78350f" stroke-width="7"/>
+          <!-- 主熱氣球彩條 -->
+          <circle cx="300" cy="235" r="165" fill="#ef4444" stroke="#1e293b" stroke-width="8"/>
+          <ellipse cx="300" cy="235" rx="115" ry="165" fill="#facc15" stroke="#1e293b" stroke-width="7"/>
+          <ellipse cx="300" cy="235" rx="60" ry="165" fill="#3b82f6" stroke="#1e293b" stroke-width="7"/>
+          <!-- 裝飾波浪帶 -->
+          <rect x="138" y="218" width="324" height="34" rx="10" fill="#10b981" stroke="#1e293b" stroke-width="6"/>
+          <!-- 遠方小熱氣球 -->
+          <circle cx="120" cy="420" r="42" fill="#a855f7" stroke="#581c87" stroke-width="5"/>
+          <rect x="108" y="472" width="24" height="20" rx="4" fill="#d97706"/>
+        `
+      },
+      {
+        id: 'owl',
+        name: '星空貓頭鷹',
+        svg: `
+          <rect width="600" height="600" fill="#1e1b4b"/>
+          <!-- 彎月與星星 -->
+          <circle cx="135" cy="130" r="62" fill="#facc15"/>
+          <circle cx="160" cy="115" r="52" fill="#1e1b4b"/>
+          <circle cx="480" cy="110" r="12" fill="#fde047"/><circle cx="520" cy="220" r="9" fill="#fde047"/>
+          <circle cx="95" cy="290" r="10" fill="#fde047"/>
+          <!-- 樹枝與綠葉 -->
+          <rect x="0" y="455" width="600" height="34" rx="12" fill="#78350f" stroke="#451a03" stroke-width="6"/>
+          <ellipse cx="110" cy="440" rx="34" ry="18" fill="#22c55e" transform="rotate(-20 110 440)"/>
+          <ellipse cx="500" cy="440" rx="34" ry="18" fill="#22c55e" transform="rotate(20 500 440)"/>
+          <!-- 貓頭鷹身體與翅膀 -->
+          <ellipse cx="320" cy="315" rx="135" ry="150" fill="#8b5cf6" stroke="#2e1065" stroke-width="8"/>
+          <polygon points="210,195 250,125 280,185" fill="#8b5cf6" stroke="#2e1065" stroke-width="7"/>
+          <polygon points="430,195 390,125 360,185" fill="#8b5cf6" stroke="#2e1065" stroke-width="7"/>
+          <ellipse cx="195" cy="335" rx="38" ry="82" fill="#6d28d9" stroke="#2e1065" stroke-width="7"/>
+          <ellipse cx="445" cy="335" rx="38" ry="82" fill="#6d28d9" stroke="#2e1065" stroke-width="7"/>
+          <ellipse cx="320" cy="370" rx="82" ry="75" fill="#ede9fe"/>
+          <!-- 大圓眼與鳥喙 -->
+          <circle cx="270" cy="255" r="48" fill="#ffffff" stroke="#2e1065" stroke-width="7"/>
+          <circle cx="370" cy="255" r="48" fill="#ffffff" stroke="#2e1065" stroke-width="7"/>
+          <circle cx="270" cy="255" r="22" fill="#1e1b4b"/><circle cx="262" cy="247" r="7" fill="#fff"/>
+          <circle cx="370" cy="255" r="22" fill="#1e1b4b"/><circle cx="362" cy="247" r="7" fill="#fff"/>
+          <polygon points="300,285 340,285 320,322" fill="#f59e0b" stroke="#78350f" stroke-width="5"/>
+          <!-- 爪子 -->
+          <ellipse cx="280" cy="462" rx="24" ry="14" fill="#f59e0b"/>
+          <ellipse cx="360" cy="462" rx="24" ry="14" fill="#f59e0b"/>
+        `
+      }
+    ].map(item => ({
+      ...item,
+      url: svgToDataUrl(item.svg)
+    }));
+
+    // ====== 遊戲狀態 ======
+    const state = {
+      selectedPicIdx: 0,
+      customPicUrl: null,
+      gridSize: 3,               // 3 | 4 | 5
+      tiles: [],                 // 長度為 N*N，存放每個位置目前的原圖區塊編號 (0 ~ N*N-1)
+      selectedTilePos: null,     // 點擊第一塊待交換的位置索引
+      moves: 0,
+      startTimeMs: 0,
+      elapsedMs: 0,
+      timerId: null,
+      isPlaying: false,
+      showWatermark: true,
+      showNumbers: false
+    };
+
+    // ====== 初始化選圖畫廊 ======
+    function renderGallery() {
+      const container = document.getElementById('galleryGrid');
+      container.innerHTML = '';
+
+      PRESET_PICTURES.forEach((pic, idx) => {
+        const card = document.createElement('div');
+        const isSelected = state.customPicUrl === null && state.selectedPicIdx === idx;
+        card.className = `pic-card ${isSelected ? 'selected' : ''}`;
+        card.innerHTML = `
+          <img class="pic-thumb" src="${pic.url}" alt="${pic.name}">
+          <span class="pic-name">${idx + 1}. ${pic.name}</span>
+        `;
+        card.addEventListener('click', () => {
+          state.customPicIdx = null;
+          state.customPicUrl = null;
+          state.selectedPicIdx = idx;
+          renderGallery();
+        });
+        container.appendChild(card);
+      });
+    }
+
+    function getCurrentImageUrl() {
+      if (state.customPicUrl) return state.customPicUrl;
+      return PRESET_PICTURES[state.selectedPicIdx].url;
+    }
+
+    // 處理使用者上傳自選圖片（自動裁切為正方形 DataURL）
+    document.getElementById('customImgInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const size = 600;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          state.customPicUrl = canvas.toDataURL('image/jpeg', 0.9);
+          renderGallery();
+          startGame();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // ====== 最佳紀錄管理 ======
+    function getBestRecordKey(size = state.gridSize) {
+      return `puzzle_best_time_size_${size}`;
+    }
+
+    function updateBestRecordUI() {
+      const n = state.gridSize;
+      document.getElementById('bestRecordLabel').textContent = `${n} × ${n} 最快完成紀錄`;
+      const raw = localStorage.getItem(getBestRecordKey(n));
+      document.getElementById('bestRecordValue').textContent = raw ? `${ parseFloat(raw).toFixed(1) } 秒` : '尚無紀錄';
+    }
+
+    // ====== 畫面切換 ======
+    const screens = {
+      start: document.getElementById('startScreen'),
+      game: document.getElementById('gameScreen'),
+      result: document.getElementById('resultScreen')
+    };
+
+    function switchScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    // ====== 開始並洗牌拼圖 ======
+    function startGame() {
+      sfx.init();
+      const n = Number(state.gridSize);
+      const total = n * n;
+
+      // 產生 0 ~ total-1 並隨機洗牌（確保不會一開始就剛好排好）
+      state.tiles = Array.from({ length: total }, (_, i) => i);
+      do {
+        for (let i = total - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [state.tiles[i], state.tiles[j]] = [state.tiles[j], state.tiles[i]];
+        }
+      } while (state.tiles.every((val, idx) => val === idx));
+
+      state.selectedTilePos = null;
+      state.moves = 0;
+      state.isPlaying = true;
+      state.startTimeMs = performance.now();
+      state.elapsedMs = 0;
+
+      const imgUrl = getCurrentImageUrl();
+      document.getElementById('boardWatermark').style.backgroundImage = `url("${imgUrl}")`;
+      document.getElementById('boardPeekOverlay').style.backgroundImage = `url("${imgUrl}")`;
+
+      const gridEl = document.getElementById('puzzleGrid');
+      gridEl.classList.remove('solved');
+      gridEl.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+      gridEl.style.gridTemplateRows = `repeat(${n}, 1fr)`;
+
+      renderBoard();
+      updateHud();
+      switchScreen('game');
+
+      clearInterval(state.timerId);
+      state.timerId = setInterval(() => {
+        if (!state.isPlaying) return;
+        state.elapsedMs = performance.now() - state.startTimeMs;
+        document.getElementById('hudTime').textContent = `${(state.elapsedMs / 1000).toFixed(1)}s`;
+      }, 100);
+    }
+
+    // ====== 渲染拼圖棋盤 ======
+    function renderBoard() {
+      const n = Number(state.gridSize);
+      const gridEl = document.getElementById('puzzleGrid');
+      const imgUrl = getCurrentImageUrl();
+      gridEl.innerHTML = '';
+
+      state.tiles.forEach((pieceId, posIdx) => {
+        const tile = document.createElement('div');
+        tile.className = 'puzzle-tile';
+        if (pieceId === posIdx) tile.classList.add('in-place');
+        if (state.selectedTilePos === posIdx) tile.classList.add('selected-tile');
+
+        tile.dataset.pos = posIdx;
+
+        // 計算該拼圖塊在原圖中的百分比位置
+        const origRow = Math.floor(pieceId / n);
+        const origCol = pieceId % n;
+        const xPercent = (origCol / (n - 1)) * 100;
+        const yPercent = (origRow / (n - 1)) * 100;
+
+        tile.style.backgroundImage = `url("${imgUrl}")`;
+        tile.style.backgroundSize = `${n * 100}% ${n * 100}%`;
+        tile.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+
+        const numBadge = document.createElement('span');
+        numBadge.className = 'tile-number';
+        numBadge.textContent = pieceId + 1;
+        tile.appendChild(numBadge);
+
+        gridEl.appendChild(tile);
+      });
+    }
+
+    // 交換兩個位置的拼圖塊
+    function swapTiles(posA, posB) {
+      if (!state.isPlaying || posA === posB) return;
+
+      [state.tiles[posA], state.tiles[posB]] = [state.tiles[posB], state.tiles[posA]];
+      state.moves++;
+      state.selectedTilePos = null;
+
+      const matchedNow = (state.tiles[posA] === posA) || (state.tiles[posB] === posB);
+      sfx.swap(matchedNow);
+
+      renderBoard();
+      updateHud();
+
+      // 檢查是否全部拼對
+      if (state.tiles.every((pieceId, idx) => pieceId === idx)) {
+        onPuzzleSolved();
+      }
+    }
+
+    function updateHud() {
+      const n = Number(state.gridSize);
+      const total = n * n;
+      const inPlaceCount = state.tiles.filter((pieceId, idx) => pieceId === idx).length;
+      document.getElementById('hudProgress').textContent = `${inPlaceCount} / ${total}`;
+      document.getElementById('hudMoves').textContent = `${state.moves}`;
+    }
+
+    function onPuzzleSolved() {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      sfx.win();
+
+      const gridEl = document.getElementById('puzzleGrid');
+      gridEl.classList.add('solved');
+
+      const totalSec = Number((state.elapsedMs / 1000).toFixed(1));
+      const bestKey = getBestRecordKey();
+      const prevBest = localStorage.getItem(bestKey);
+      let isNewRecord = false;
+      if (!prevBest || totalSec < parseFloat(prevBest)) {
+        localStorage.setItem(bestKey, String(totalSec));
+        isNewRecord = true;
+      }
+
+      setTimeout(() => {
+        document.getElementById('resultBadge').textContent = isNewRecord ? '🏆 刷新最快紀錄！' : '🎉 拼圖完成！';
+        document.getElementById('resultPreviewImg').src = getCurrentImageUrl();
+        document.getElementById('statTime').textContent = `${totalSec.toFixed(1)} 秒`;
+        document.getElementById('statMoves').textContent = `${state.moves} 步`;
+        updateBestRecordUI();
+        switchScreen('result');
+      }, 650);
+    }
+
+    // ====== 手指 / 滑鼠拖曳與點擊交換系統 (Pointer Events) ======
+    let dragInfo = null;
+
+    const puzzleGridEl = document.getElementById('puzzleGrid');
+
+    puzzleGridEl.addEventListener('pointerdown', (e) => {
+      if (!state.isPlaying) return;
+      const tileEl = e.target.closest('.puzzle-tile');
+      if (!tileEl) return;
+
+      e.preventDefault();
+      const fromPos = parseInt(tileEl.dataset.pos, 10);
+      const rect = tileEl.getBoundingClientRect();
+
+      dragInfo = {
+        fromPos,
+        startX: e.clientX,
+        startY: e.clientY,
+        isDragging: false,
+        sourceEl: tileEl,
+        floatingEl: null,
+        currentTargetPos: null,
+        tileWidth: rect.width,
+        tileHeight: rect.height
+      };
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!dragInfo || !state.isPlaying) return;
+
+      const dx = e.clientX - dragInfo.startX;
+      const dy = e.clientY - dragInfo.startY;
+
+      // 移動超過 6px 視為開始拖曳
+      if (!dragInfo.isDragging && Math.hypot(dx, dy) > 6) {
+        dragInfo.isDragging = true;
+        sfx.pickup();
+        dragInfo.sourceEl.classList.add('dragging-source');
+
+        const clone = document.createElement('div');
+        clone.className = 'drag-floating-clone';
+        clone.style.width = `${dragInfo.tileWidth}px`;
+        clone.style.height = `${dragInfo.tileHeight}px`;
+        clone.style.backgroundImage = dragInfo.sourceEl.style.backgroundImage;
+        clone.style.backgroundSize = dragInfo.sourceEl.style.backgroundSize;
+        clone.style.backgroundPosition = dragInfo.sourceEl.style.backgroundPosition;
+        document.body.appendChild(clone);
+        dragInfo.floatingEl = clone;
+      }
+
+      if (dragInfo.isDragging && dragInfo.floatingEl) {
+        dragInfo.floatingEl.style.left = `${e.clientX}px`;
+        dragInfo.floatingEl.style.top = `${e.clientY}px`;
+
+        // 偵測手指下方是哪一格拼圖
+        const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+        const targetTile = elemBelow ? elemBelow.closest('.puzzle-tile') : null;
+
+        document.querySelectorAll('.puzzle-tile.drop-target').forEach(el => el.classList.remove('drop-target'));
+
+        if (targetTile) {
+          const targetPos = parseInt(targetTile.dataset.pos, 10);
+          if (targetPos !== dragInfo.fromPos) {
+            targetTile.classList.add('drop-target');
+            dragInfo.currentTargetPos = targetPos;
+          } else {
+            dragInfo.currentTargetPos = null;
+          }
+        } else {
+          dragInfo.currentTargetPos = null;
+        }
+      }
+    });
+
+    function finishPointerInteraction() {
+      if (!dragInfo) return;
+      const info = dragInfo;
+      dragInfo = null;
+
+      if (info.floatingEl) {
+        info.floatingEl.remove();
+      }
+      if (info.sourceEl) {
+        info.sourceEl.classList.remove('dragging-source');
+      }
+      document.querySelectorAll('.puzzle-tile.drop-target').forEach(el => el.classList.remove('drop-target'));
+
+      if (!state.isPlaying) return;
+
+      if (info.isDragging) {
+        // 拖曳放開：若有停在另一塊拼圖上，立即交換
+        if (info.currentTargetPos !== null && info.currentTargetPos !== info.fromPos) {
+          swapTiles(info.fromPos, info.currentTargetPos);
+        }
+      } else {
+        // 輕點一下（Click / Tap）：支援點兩塊交換
+        sfx.pickup();
+        if (state.selectedTilePos === null) {
+          state.selectedTilePos = info.fromPos;
+          renderBoard();
+        } else if (state.selectedTilePos === info.fromPos) {
+          state.selectedTilePos = null;
+          renderBoard();
+        } else {
+          swapTiles(state.selectedTilePos, info.fromPos);
+        }
+      }
+    }
+
+    window.addEventListener('pointerup', finishPointerInteraction);
+    window.addEventListener('pointercancel', finishPointerInteraction);
+
+    // ====== 輔助工具按鈕事件 ======
+    document.getElementById('toggleWatermarkBtn').addEventListener('click', (e) => {
+      state.showWatermark = !state.showWatermark;
+      document.getElementById('boardWatermark').classList.toggle('show', state.showWatermark);
+      e.currentTarget.classList.toggle('active', state.showWatermark);
+      e.currentTarget.innerHTML = `<span>🖼️ 底圖浮水印：${state.showWatermark ? '開' : '關'}</span>`;
+    });
+
+    document.getElementById('toggleNumbersBtn').addEventListener('click', (e) => {
+      state.showNumbers = !state.showNumbers;
+      document.getElementById('puzzleGrid').classList.toggle('show-numbers', state.showNumbers);
+      e.currentTarget.classList.toggle('active', state.showNumbers);
+      e.currentTarget.innerHTML = `<span>🔢 編號提示：${state.showNumbers ? '開' : '關'}</span>`;
+    });
+
+    const peekBtn = document.getElementById('peekOriginalBtn');
+    const peekOverlay = document.getElementById('boardPeekOverlay');
+    const showPeek = () => peekOverlay.classList.add('show');
+    const hidePeek = () => peekOverlay.classList.remove('show');
+
+    peekBtn.addEventListener('pointerdown', showPeek);
+    peekBtn.addEventListener('pointerup', hidePeek);
+    peekBtn.addEventListener('pointerleave', hidePeek);
+    peekBtn.addEventListener('pointercancel', hidePeek);
+
+    // ====== 首頁與結算按鈕綁定 ======
+    document.getElementById('sizeSelector').addEventListener('click', (e) => {
+      const card = e.target.closest('.option-card');
+      if (!card) return;
+      document.querySelectorAll('#sizeSelector .option-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.gridSize = Number(card.dataset.size);
+      updateBestRecordUI();
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+
+    document.getElementById('quitBtn').addEventListener('click', () => {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      switchScreen('start');
+    });
+
+    document.getElementById('backHomeBtn').addEventListener('click', () => {
+      switchScreen('start');
+    });
+
+    document.getElementById('nextPicBtn').addEventListener('click', () => {
+      state.customPicUrl = null;
+      state.selectedPicIdx = (state.selectedPicIdx + 1) % PRESET_PICTURES.length;
+      renderGallery();
+      startGame();
+    });
+
+    document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+      sfx.enabled = !sfx.enabled;
+      e.currentTarget.textContent = sfx.enabled ? '🔊' : '🔇';
+    });
+
+    // 初始化
+    renderGallery();
+    updateBestRecordUI();
+  </script>
+</body>
+</html>
