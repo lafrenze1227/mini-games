@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>大家來找碴 - 雙圖場景觀察力大挑戰</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #161e31 100%);
+      --card-bg: #1e293b;
+      --surface: #0f172a;
+      --surface-hover: #263449;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: rgba(99, 102, 241, 0.18);
+      --secondary: #10b981;
+      --secondary-light: rgba(16, 185, 129, 0.18);
+      --accent: #f59e0b;
+      --accent-light: rgba(245, 158, 11, 0.18);
+      --danger: #ef4444;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --shadow-lg: 0 20px 28px -5px rgba(0, 0, 0, 0.55), 0 8px 12px -6px rgba(0, 0, 0, 0.4);
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 640px;
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 16px 18px;
+      position: relative;
+      border: 1px solid var(--border);
+    }
+
+    /* 頂部列 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f97316 0%, #eab308 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 1.02rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-hover);
+      border-color: #475569;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 首頁設定 */
+    .section-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .scene-gallery {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .scene-card {
+      border: 2px solid var(--border);
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .scene-card:hover {
+      border-color: #475569;
+      background: var(--surface-hover);
+      transform: translateY(-2px);
+    }
+
+    .scene-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: #c7d2fe;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .scene-emoji {
+      font-size: 1.65rem;
+      line-height: 1.1;
+    }
+
+    .scene-name {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .scene-card.selected .scene-name {
+      color: #c7d2fe;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .option-card {
+      border: 2px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .option-card:hover {
+      border-color: #475569;
+      background: var(--surface-hover);
+    }
+
+    .option-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: #c7d2fe;
+    }
+
+    .option-title {
+      font-size: 0.92rem;
+      font-weight: 900;
+    }
+
+    .option-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .option-card.selected .option-desc {
+      color: #a5b4fc;
+    }
+
+    .best-record-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 9px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .best-record-label {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .best-record-value {
+      font-weight: 800;
+      color: #fbbf24;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -3px rgba(99, 102, 241, 0.4);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .primary-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    /* 遊戲畫面頂部資訊列 */
+    .hud-bar {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .hud-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    .hud-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .hud-value {
+      font-size: 0.98rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-value.good { color: #34d399; }
+    .hud-value.highlight { color: #fbbf24; }
+
+    /* 找到的圓點進度指示 */
+    .diff-dots {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .diff-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #334155;
+      border: 1.5px solid #64748b;
+      transition: all 0.2s ease;
+    }
+
+    .diff-dot.found {
+      background: #10b981;
+      border-color: #6ee7b7;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* 雙圖對照容器 (上下排列，手機與電腦皆清晰好點) */
+    .boards-compare {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .scene-panel {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 600 / 340;
+      background: #090d16;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      overflow: hidden;
+      cursor: crosshair;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+      touch-action: manipulation;
+    }
+
+    .scene-panel-badge {
+      position: absolute;
+      top: 7px;
+      left: 8px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #f8fafc;
+      font-size: 0.68rem;
+      font-weight: 800;
+      z-index: 10;
+      pointer-events: none;
+      backdrop-filter: blur(3px);
+    }
+
+    .scene-panel svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 找對時的綠色圓圈標記與點錯時的紅叉特效 */
+    .overlay-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    .found-ring {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3.5px solid #10b981;
+      background: rgba(16, 185, 129, 0.16);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.8), inset 0 0 8px rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      animation: ringPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes ringPop {
+      0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    .miss-cross {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      color: #ef4444;
+      font-size: 1.65rem;
+      font-weight: 900;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+      animation: crossFade 0.55s ease forwards;
+    }
+
+    @keyframes crossFade {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+      40% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    }
+
+    .game-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .quit-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .quit-btn:hover {
+      background: var(--surface);
+      color: var(--text-main);
+    }
+
+    /* 過關結算畫面 */
+    .result-hero {
+      text-align: center;
+      padding: 10px 0 16px;
+    }
+
+    .result-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: #fbbf24;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .result-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .result-stars-big {
+      font-size: 2.6rem;
+      letter-spacing: 6px;
+      margin: 6px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-box-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .stat-box-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #818cf8;
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      padding: 13px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .secondary-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    @media (max-width: 440px) {
+      .scene-gallery {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+      }
+      .scene-name {
+        font-size: 0.62rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 頂部列 -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">🔍</div>
+        <div>
+          <div class="brand-title">大家來找碴</div>
+          <div class="brand-subtitle">雙圖場景比較 · 隨機差異不重複</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="./index.html" class="icon-btn" title="返回遊戲大廳">🏠</a>
+        <button id="soundToggleBtn" class="icon-btn" title="切換音效">🔊</button>
+      </div>
+    </div>
+
+    <!-- 畫面 1：首頁設定 -->
+    <div id="startScreen" class="screen active">
+      <div class="section-label">
+        <span>1. 選擇探險場景（共 10 大主題，每次重玩差異點隨機改變！）</span>
+      </div>
+      <div class="scene-gallery" id="sceneGallery"></div>
+
+      <div class="section-label">
+        <span>2. 選擇要找出的不同處數量（難度）</span>
+      </div>
+      <div class="option-grid" id="countSelector">
+        <div class="option-card selected" data-count="3">
+          <span class="option-title">🌱 找 3 個不同</span>
+          <span class="option-desc">輕鬆入門觀察</span>
+        </div>
+        <div class="option-card" data-count="5">
+          <span class="option-title">⭐ 找 5 個不同</span>
+          <span class="option-desc">標準眼力挑戰</span>
+        </div>
+        <div class="option-card" data-count="7">
+          <span class="option-title">👑 找 7 個不同</span>
+          <span class="option-desc">偵探大師級</span>
+        </div>
+      </div>
+
+      <div class="best-record-box">
+        <span class="best-record-label" id="bestRecordLabel">找 3 個不同最快紀錄</span>
+        <span class="best-record-value" id="bestRecordValue">尚無紀錄</span>
+      </div>
+
+      <button id="startBtn" class="primary-btn">
+        <span>開始找不同！</span>
+        <span>▶</span>
+      </button>
+    </div>
+
+    <!-- 畫面 2：遊戲進行 -->
+    <div id="gameScreen" class="screen">
+      <div class="hud-bar">
+        <div class="hud-item">
+          <div class="hud-label" id="hudProgressLabel">已找出 0 / 3 處不同</div>
+          <div class="diff-dots" id="diffDots"></div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">點錯次數</div>
+          <div class="hud-value highlight" id="hudMistakes">0</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">觀察時間</div>
+          <div class="hud-value" id="hudTime">0.0s</div>
+        </div>
+      </div>
+
+      <!-- 上下雙圖比對區（點擊上圖或下圖的不同處皆可） -->
+      <div class="boards-compare">
+        <div class="scene-panel" id="topPanel">
+          <span class="scene-panel-badge">原始圖 A（點擊上圖或下圖的不同處皆可）</span>
+          <div id="topSvgHolder" style="width:100%;height:100%;"></div>
+          <div class="overlay-layer" id="topOverlay"></div>
+        </div>
+
+        <div class="scene-panel" id="bottomPanel">
+          <span class="scene-panel-badge">對照圖 B（找出不一樣的地方！）</span>
+          <div id="bottomSvgHolder" style="width:100%;height:100%;"></div>
+          <div class="overlay-layer" id="bottomOverlay"></div>
+        </div>
+      </div>
+
+      <div class="game-footer">
+        <span>💡 仔細比較顏色、表情、方向或消失的小物件！</span>
+        <button id="quitBtn" class="quit-btn">換場景 / 返回</button>
+      </div>
+    </div>
+
+    <!-- 畫面 3：過關結算 -->
+    <div id="resultScreen" class="screen">
+      <div class="result-hero">
+        <span id="resultBadge" class="result-badge">🎉 全部找出來了！</span>
+        <div class="result-title" id="resultTitle">你的眼睛真銳利！</div>
+        <div class="result-stars-big" id="resultStarsBig">⭐⭐⭐</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">完成時間</div>
+          <div class="stat-box-val" id="statTime">15.8 秒</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">點錯次數</div>
+          <div class="stat-box-val" id="statMistakes">0 次</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="retrySameBtn" class="secondary-btn">同場景重抽題 ↻</button>
+        <button id="nextSceneBtn" class="primary-btn">下一個場景 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== 音效合成器 ======
+    class SoundEffects {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, delay = 0, gainVal = 0.12) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      found() {
+        this.playTone(587.33, 'sine', 0.08, 0, 0.13);
+        this.playTone(880, 'sine', 0.16, 0.06, 0.15);
+      }
+
+      miss() {
+        this.playTone(210, 'triangle', 0.12, 0, 0.12);
+        this.playTone(165, 'triangle', 0.16, 0.07, 0.12);
+      }
+
+      win() {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => this.playTone(n, 'sine', 0.22, idx * 0.08, 0.14));
+      }
+    }
+
+    const sfx = new SoundEffects();
+
+    // ====== 10 大主題場景與每個場景 8 個獨立可變物件 (600x340 座標系) ======
+    // 每個 spot 定義：id, x, y, r (判定半徑), normal (A圖繪製), diff (B圖當被抽中為差異點時繪製)
+    const SCENES = [
+      {
+        id: 'farm',
+        name: '陽光農場',
+        emoji: '🐮',
+        bg: `
+          <rect width="600" height="340" fill="#7dd3fc"/>
+          <ellipse cx="140" cy="295" rx="220" ry="95" fill="#4ade80"/>
+          <ellipse cx="470" cy="300" rx="240" ry="100" fill="#22c55e"/>
+          <!-- 柵欄 -->
+          <rect x="30" y="210" width="180" height="10" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+          <rect x="30" y="230" width="180" height="10" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+          <rect x="50" y="195" width="12" height="55" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+          <rect x="115" y="195" width="12" height="55" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+          <rect x="180" y="195" width="12" height="55" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+        `,
+        spots: [
+          {
+            x: 85, y: 65, r: 42,
+            normal: `<circle cx="85" cy="65" r="34" fill="#facc15" stroke="#f97316" stroke-width="6"/><circle cx="74" cy="58" r="4" fill="#7c2d12"/><circle cx="96" cy="58" r="4" fill="#7c2d12"/><path d="M74,72 Q85,82 96,72" fill="none" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>`,
+            diff:   `<circle cx="85" cy="65" r="34" fill="#fb7185" stroke="#e11d48" stroke-width="6"/><rect x="65" y="52" width="16" height="10" rx="2" fill="#1e293b"/><rect x="89" y="52" width="16" height="10" rx="2" fill="#1e293b"/><line x1="81" y1="57" x2="89" y2="57" stroke="#1e293b" stroke-width="3"/><circle cx="85" cy="74" r="6" fill="#7c2d12"/>`
+          },
+          {
+            x: 245, y: 65, r: 42,
+            normal: `<g fill="#ffffff"><circle cx="225" cy="65" r="22"/><circle cx="248" cy="58" r="26"/><circle cx="272" cy="66" r="20"/></g>`,
+            diff:   `<g fill="#ffffff"><circle cx="225" cy="65" r="22"/><circle cx="248" cy="58" r="26"/><circle cx="272" cy="66" r="20"/></g><path d="M240,32 L248,42 L256,32" fill="none" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`
+          },
+          {
+            x: 475, y: 155, r: 52,
+            normal: `<polygon points="415,130 475,75 535,130" fill="#ef4444" stroke="#7f1d1d" stroke-width="4"/><rect x="425" y="130" width="100" height="95" fill="#dc2626" stroke="#7f1d1d" stroke-width="4"/><rect x="455" y="165" width="40" height="60" fill="#78350f" stroke="#ffffff" stroke-width="3"/>`,
+            diff:   `<polygon points="415,130 475,75 535,130" fill="#3b82f6" stroke="#1e3a8a" stroke-width="4"/><rect x="425" y="130" width="100" height="95" fill="#2563eb" stroke="#1e3a8a" stroke-width="4"/><rect x="455" y="165" width="40" height="60" fill="#facc15" stroke="#ffffff" stroke-width="3"/>`
+          },
+          {
+            x: 475, y: 112, r: 34,
+            normal: `<circle cx="475" cy="112" r="14" fill="#fef08a" stroke="#7f1d1d" stroke-width="3"/>`,
+            diff:   `<polygon points="475,96 492,124 458,124" fill="#a855f7" stroke="#ffffff" stroke-width="3"/>`
+          },
+          {
+            x: 300, y: 245, r: 48,
+            normal: `<rect x="260" y="220" width="80" height="52" rx="22" fill="#ffffff" stroke="#1e293b" stroke-width="4"/><circle cx="285" cy="240" r="12" fill="#1e293b"/><circle cx="320" cy="252" r="10" fill="#1e293b"/><circle cx="255" cy="215" r="24" fill="#ffffff" stroke="#1e293b" stroke-width="4"/><ellipse cx="255" cy="226" rx="15" ry="10" fill="#f9a8d4"/><circle cx="247" cy="208" r="4" fill="#1e293b"/><circle cx="263" cy="208" r="4" fill="#1e293b"/>`,
+            diff:   `<rect x="260" y="220" width="80" height="52" rx="22" fill="#fde047" stroke="#1e293b" stroke-width="4"/><circle cx="285" cy="240" r="12" fill="#92400e"/><circle cx="320" cy="252" r="10" fill="#92400e"/><circle cx="255" cy="215" r="24" fill="#fde047" stroke="#1e293b" stroke-width="4"/><ellipse cx="255" cy="226" rx="15" ry="10" fill="#fb923c"/><circle cx="247" cy="208" r="4" fill="#1e293b"/><circle cx="263" cy="208" r="4" fill="#1e293b"/>`
+          },
+          {
+            x: 115, y: 285, r: 40,
+            normal: `<ellipse cx="115" cy="285" rx="32" ry="22" fill="#f9a8d4" stroke="#831843" stroke-width="4"/><circle cx="95" cy="280" r="16" fill="#f472b6" stroke="#831843" stroke-width="4"/><ellipse cx="88" cy="283" rx="7" ry="5" fill="#ec4899"/><circle cx="92" cy="274" r="3" fill="#000"/>`,
+            diff:   `<ellipse cx="115" cy="285" rx="32" ry="22" fill="#f9a8d4" stroke="#831843" stroke-width="4"/><circle cx="135" cy="280" r="16" fill="#f472b6" stroke="#831843" stroke-width="4"/><ellipse cx="142" cy="283" rx="7" ry="5" fill="#ec4899"/><circle cx="138" cy="274" r="3" fill="#000"/>`
+          },
+          {
+            x: 545, y: 285, r: 38,
+            normal: `<line x1="545" y1="285" x2="545" y2="325" stroke="#15803d" stroke-width="6"/><circle cx="545" cy="275" r="22" fill="#facc15"/><circle cx="545" cy="275" r="11" fill="#78350f"/>`,
+            diff:   `<line x1="545" y1="285" x2="545" y2="325" stroke="#15803d" stroke-width="6"/><circle cx="545" cy="275" r="22" fill="#ec4899"/><circle cx="545" cy="275" r="11" fill="#fef08a"/>`
+          },
+          {
+            x: 365, y: 155, r: 38,
+            normal: `<rect x="355" y="150" width="20" height="65" fill="#78350f"/><circle cx="365" cy="135" r="32" fill="#16a34a"/><circle cx="355" cy="128" r="6" fill="#ef4444"/><circle cx="376" cy="142" r="6" fill="#ef4444"/>`,
+            diff:   `<rect x="355" y="150" width="20" height="65" fill="#78350f"/><circle cx="365" cy="135" r="32" fill="#16a34a"/>`
+          }
+        ]
+      },
+      {
+        id: 'space',
+        name: '太空探險',
+        emoji: '🚀',
+        bg: `
+          <rect width="600" height="340" fill="#0f172a"/>
+          <ellipse cx="300" cy="335" rx="340" ry="65" fill="#334155"/>
+          <circle cx="180" cy="315" r="18" fill="#1e293b"/><circle cx="420" cy="310" r="22" fill="#1e293b"/>
+          <circle cx="40" cy="120" r="3" fill="#fff"/><circle cx="550" cy="180" r="4" fill="#fff"/><circle cx="310" cy="40" r="3" fill="#fff"/>
+        `,
+        spots: [
+          {
+            x: 110, y: 85, r: 46,
+            normal: `<circle cx="110" cy="85" r="32" fill="#a855f7"/><ellipse cx="110" cy="85" rx="58" ry="14" fill="none" stroke="#fde047" stroke-width="7" transform="rotate(-18 110 85)"/>`,
+            diff:   `<circle cx="110" cy="85" r="32" fill="#10b981"/><ellipse cx="110" cy="85" rx="58" ry="14" fill="none" stroke="#38bdf8" stroke-width="7" transform="rotate(22 110 85)"/>`
+          },
+          {
+            x: 300, y: 175, r: 52,
+            normal: `<polygon points="275,230 325,230 300,285" fill="#f97316"/><path d="M300,85 C345,130 350,185 342,230 L258,230 C250,185 255,130 300,85 Z" fill="#f8fafc" stroke="#475569" stroke-width="5"/><circle cx="300" cy="165" r="22" fill="#38bdf8" stroke="#f59e0b" stroke-width="6"/>`,
+            diff:   `<polygon points="275,230 325,230 300,285" fill="#38bdf8"/><path d="M300,85 C345,130 350,185 342,230 L258,230 C250,185 255,130 300,85 Z" fill="#facc15" stroke="#92400e" stroke-width="5"/><rect x="280" y="145" width="40" height="36" rx="6" fill="#ec4899" stroke="#ffffff" stroke-width="5"/>`
+          },
+          {
+            x: 495, y: 80, r: 44,
+            normal: `<circle cx="495" cy="80" r="34" fill="#3b82f6"/><path d="M475,65 Q495,80 485,105 L515,95 Q520,70 500,55 Z" fill="#22c55e"/>`,
+            diff:   `<circle cx="495" cy="80" r="34" fill="#facc15"/><circle cx="510" cy="70" r="28" fill="#0f172a"/>`
+          },
+          {
+            x: 115, y: 235, r: 44,
+            normal: `<ellipse cx="115" cy="225" rx="26" ry="20" fill="#38bdf8"/><ellipse cx="115" cy="240" rx="48" ry="16" fill="#94a3b8" stroke="#e2e8f0" stroke-width="4"/><circle cx="92" cy="240" r="5" fill="#facc15"/><circle cx="115" cy="242" r="5" fill="#facc15"/><circle cx="138" cy="240" r="5" fill="#facc15"/>`,
+            diff:   `<ellipse cx="115" cy="225" rx="26" ry="20" fill="#f472b6"/><ellipse cx="115" cy="240" rx="48" ry="16" fill="#a855f7" stroke="#f9a8d4" stroke-width="4"/><polygon points="95,256 135,256 150,295 80,295" fill="#fde047" opacity="0.55"/>`
+          },
+          {
+            x: 485, y: 235, r: 44,
+            normal: `<rect x="463" y="220" width="44" height="48" rx="14" fill="#ffffff" stroke="#64748b" stroke-width="4"/><circle cx="485" cy="195" r="24" fill="#ffffff" stroke="#64748b" stroke-width="4"/><ellipse cx="485" cy="195" rx="16" ry="12" fill="#1e293b"/>`,
+            diff:   `<rect x="463" y="220" width="44" height="48" rx="14" fill="#4ade80" stroke="#065f46" stroke-width="4"/><circle cx="485" cy="195" r="24" fill="#4ade80" stroke="#065f46" stroke-width="4"/><circle cx="476" cy="192" r="5" fill="#000"/><circle cx="494" cy="192" r="5" fill="#000"/><circle cx="485" cy="182" r="5" fill="#000"/>`
+          },
+          {
+            x: 215, y: 95, r: 34,
+            normal: `<polygon points="215,72 222,88 238,90 225,102 229,118 215,109 201,118 205,102 192,90 208,88" fill="#facc15"/>`,
+            diff:   `<line x1="185" y1="115" x2="230" y2="85" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/><circle cx="232" cy="84" r="12" fill="#f43f5e"/>`
+          },
+          {
+            x: 400, y: 120, r: 34,
+            normal: `<rect x="372" y="110" width="56" height="18" rx="4" fill="#3b82f6" stroke="#93c5fd" stroke-width="2"/><rect x="392" y="102" width="16" height="34" rx="4" fill="#e2e8f0"/>`,
+            diff:   `<circle cx="400" cy="120" r="20" fill="#a855f7" stroke="#e9d5ff" stroke-width="3"/><circle cx="394" cy="114" r="5" fill="#7e22ce"/><circle cx="407" cy="125" r="6" fill="#7e22ce"/>`
+          },
+          {
+            x: 385, y: 275, r: 34,
+            normal: `<line x1="370" y1="305" x2="370" y2="250" stroke="#e2e8f0" stroke-width="4"/><polygon points="370,250 412,262 370,275" fill="#ef4444"/>`,
+            diff:   `<line x1="370" y1="305" x2="370" y2="250" stroke="#e2e8f0" stroke-width="4"/><polygon points="370,250 328,262 370,275" fill="#22c55e"/>`
+          }
+        ]
+      },
+      {
+        id: 'ocean',
+        name: '海底世界',
+        emoji: '🐳',
+        bg: `
+          <defs>
+            <linearGradient id="ocBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0369a1"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="340" fill="url(#ocBg)"/>
+          <ellipse cx="300" cy="330" rx="340" ry="50" fill="#fde047"/>
+          <path d="M40,320 Q25,250 50,200 Q65,250 55,320" fill="#10b981"/>
+          <path d="M555,320 Q575,240 545,190 Q530,240 540,320" fill="#10b981"/>
+        `,
+        spots: [
+          {
+            x: 165, y: 140, r: 52,
+            normal: `<path d="M95,155 C95,95 210,95 230,145 L265,120 L255,170 L95,170 Z" fill="#38bdf8" stroke="#0c4a6e" stroke-width="4"/><circle cx="135" cy="135" r="7" fill="#0c4a6e"/>`,
+            diff:   `<path d="M95,155 C95,95 210,95 230,145 L265,120 L255,170 L95,170 Z" fill="#f472b6" stroke="#831843" stroke-width="4"/><circle cx="135" cy="135" r="7" fill="#831843"/>`
+          },
+          {
+            x: 145, y: 65, r: 34,
+            normal: `<path d="M140,95 Q125,55 105,60" fill="none" stroke="#e0f2fe" stroke-width="6" stroke-linecap="round"/><path d="M150,95 Q165,55 185,60" fill="none" stroke="#e0f2fe" stroke-width="6" stroke-linecap="round"/>`,
+            diff:   `<circle cx="145" cy="70" r="14" fill="none" stroke="#e0f2fe" stroke-width="4"/>`
+          },
+          {
+            x: 455, y: 135, r: 48,
+            normal: `<circle cx="455" cy="120" r="32" fill="#a855f7" stroke="#581c87" stroke-width="4"/><path d="M430,145 Q420,175 435,175 Q445,150 455,175 Q465,150 475,175 Q490,175 480,145" fill="none" stroke="#a855f7" stroke-width="8" stroke-linecap="round"/><circle cx="443" cy="115" r="5" fill="#fff"/><circle cx="467" cy="115" r="5" fill="#fff"/>`,
+            diff:   `<circle cx="455" cy="120" r="32" fill="#f97316" stroke="#7c2d12" stroke-width="4"/><path d="M430,145 Q420,175 435,175 Q445,150 455,175 Q465,150 475,175 Q490,175 480,145" fill="none" stroke="#f97316" stroke-width="8" stroke-linecap="round"/><circle cx="443" cy="115" r="5" fill="#000"/><circle cx="467" cy="115" r="5" fill="#000"/>`
+          },
+          {
+            x: 325, y: 205, r: 40,
+            normal: `<ellipse cx="320" cy="205" rx="28" ry="18" fill="#f97316" stroke="#ffffff" stroke-width="4"/><polygon points="346,205 366,190 366,220" fill="#f97316"/><circle cx="306" cy="201" r="4" fill="#000"/>`,
+            diff:   `<ellipse cx="330" cy="205" rx="28" ry="18" fill="#facc15" stroke="#1e293b" stroke-width="4"/><polygon points="304,205 284,190 284,220" fill="#facc15"/><circle cx="344" cy="201" r="4" fill="#000"/>`
+          },
+          {
+            x: 120, y: 285, r: 38,
+            normal: `<ellipse cx="120" cy="290" rx="26" ry="18" fill="#ef4444"/><circle cx="105" cy="268" r="10" fill="#ef4444"/><circle cx="135" cy="268" r="10" fill="#ef4444"/><circle cx="112" cy="285" r="3" fill="#fff"/><circle cx="128" cy="285" r="3" fill="#fff"/>`,
+            diff:   `<polygon points="120,260 128,278 148,280 132,292 137,310 120,300 103,310 108,292 92,280 112,278" fill="#f43f5e" stroke="#ffe4e6" stroke-width="3"/>`
+          },
+          {
+            x: 285, y: 290, r: 42,
+            normal: `<rect x="255" y="275" width="60" height="36" rx="6" fill="#b45309" stroke="#facc15" stroke-width="4"/><line x1="255" y1="292" x2="315" y2="292" stroke="#facc15" stroke-width="4"/><circle cx="285" cy="292" r="6" fill="#fde047"/>`,
+            diff:   `<rect x="255" y="280" width="60" height="32" rx="6" fill="#b45309" stroke="#facc15" stroke-width="4"/><ellipse cx="285" cy="274" rx="26" ry="10" fill="#fde047"/><circle cx="275" cy="272" r="6" fill="#38bdf8"/><circle cx="295" cy="272" r="6" fill="#ec4899"/>`
+          },
+          {
+            x: 470, y: 285, r: 38,
+            normal: `<ellipse cx="470" cy="285" rx="28" ry="20" fill="#16a34a" stroke="#064e3b" stroke-width="4"/><circle cx="440" cy="282" r="12" fill="#4ade80" stroke="#064e3b" stroke-width="3"/><circle cx="436" cy="279" r="3" fill="#000"/>`,
+            diff:   `<ellipse cx="470" cy="285" rx="28" ry="20" fill="#f59e0b" stroke="#78350f" stroke-width="4"/><circle cx="500" cy="282" r="12" fill="#fde047" stroke="#78350f" stroke-width="3"/><circle cx="504" cy="279" r="3" fill="#000"/>`
+          },
+          {
+            x: 335, y: 75, r: 36,
+            normal: `<path d="M305,75 A30,24 0 0,1 365,75 Z" fill="#f9a8d4"/><line x1="315" y1="75" x2="315" y2="105" stroke="#f9a8d4" stroke-width="4"/><line x1="335" y1="75" x2="335" y2="108" stroke="#f9a8d4" stroke-width="4"/><line x1="355" y1="75" x2="355" y2="105" stroke="#f9a8d4" stroke-width="4"/>`,
+            diff:   `<path d="M305,75 A30,24 0 0,1 365,75 Z" fill="#fef08a"/><line x1="315" y1="75" x2="315" y2="105" stroke="#fef08a" stroke-width="4"/><line x1="335" y1="75" x2="335" y2="108" stroke="#fef08a" stroke-width="4"/><line x1="355" y1="75" x2="355" y2="105" stroke="#fef08a" stroke-width="4"/>`
+          }
+        ]
+      },
+      {
+        id: 'dino',
+        name: '恐龍樂園',
+        emoji: '🦖',
+        bg: `
+          <rect width="600" height="340" fill="#bae6fd"/>
+          <polygon points="30,255 150,120 270,255" fill="#86efac"/>
+          <rect y="250" width="600" height="90" fill="#22c55e"/>
+        `,
+        spots: [
+          {
+            x: 490, y: 175, r: 48,
+            normal: `<polygon points="420,255 465,125 515,125 560,255" fill="#78350f"/><path d="M465,125 Q490,145 515,125 L505,155 Q490,140 475,155 Z" fill="#ef4444"/><circle cx="490" cy="95" r="20" fill="#94a3b8"/>`,
+            diff:   `<polygon points="420,255 465,125 515,125 560,255" fill="#78350f"/><path d="M465,125 Q490,145 515,125 L505,155 Q490,140 475,155 Z" fill="#facc15"/><circle cx="490" cy="88" r="24" fill="#f97316"/>`
+          },
+          {
+            x: 90, y: 65, r: 38,
+            normal: `<circle cx="90" cy="65" r="30" fill="#facc15" stroke="#f59e0b" stroke-width="5"/>`,
+            diff:   `<circle cx="90" cy="65" r="30" fill="#f97316" stroke="#ea580c" stroke-width="5"/><circle cx="90" cy="65" r="14" fill="#fef08a"/>`
+          },
+          {
+            x: 270, y: 75, r: 42,
+            normal: `<polygon points="230,75 270,55 290,75 270,95" fill="#a855f7" stroke="#581c87" stroke-width="3"/><polygon points="270,75 315,50 300,85" fill="#c084fc"/>`,
+            diff:   `<polygon points="310,75 270,55 250,75 270,95" fill="#10b981" stroke="#064e3b" stroke-width="3"/><polygon points="270,75 225,50 240,85" fill="#34d399"/>`
+          },
+          {
+            x: 235, y: 225, r: 52,
+            normal: `<path d="M195,155 C255,155 280,195 280,255 L180,255 C175,205 165,155 195,155 Z" fill="#10b981" stroke="#064e3b" stroke-width="5"/><circle cx="205" cy="180" r="7" fill="#064e3b"/><polygon points="265,170 292,182 272,198" fill="#f97316"/><polygon points="276,205 304,218 278,232" fill="#f97316"/>`,
+            diff:   `<path d="M195,155 C255,155 280,195 280,255 L180,255 C175,205 165,155 195,155 Z" fill="#3b82f6" stroke="#1e3a8a" stroke-width="5"/><circle cx="205" cy="180" r="7" fill="#1e3a8a"/><polygon points="265,170 292,182 272,198" fill="#facc15"/><polygon points="276,205 304,218 278,232" fill="#facc15"/>`
+          },
+          {
+            x: 100, y: 280, r: 38,
+            normal: `<ellipse cx="100" cy="280" rx="26" ry="34" fill="#ffffff" stroke="#1e293b" stroke-width="4"/><circle cx="92" cy="270" r="7" fill="#60a5fa"/><circle cx="110" cy="290" r="8" fill="#f472b6"/>`,
+            diff:   `<ellipse cx="100" cy="280" rx="26" ry="34" fill="#fef08a" stroke="#1e293b" stroke-width="4"/><polygon points="80,275 95,288 110,272 122,285" fill="none" stroke="#1e293b" stroke-width="4"/>`
+          },
+          {
+            x: 375, y: 240, r: 40,
+            normal: `<rect x="367" y="195" width="16" height="65" fill="#92400e"/><ellipse cx="348" cy="195" rx="26" ry="12" fill="#16a34a"/><ellipse cx="402" cy="195" rx="26" ry="12" fill="#16a34a"/><circle cx="375" cy="185" r="18" fill="#22c55e"/>`,
+            diff:   `<rect x="367" y="195" width="16" height="65" fill="#92400e"/><ellipse cx="348" cy="195" rx="26" ry="12" fill="#16a34a"/><ellipse cx="402" cy="195" rx="26" ry="12" fill="#16a34a"/><circle cx="375" cy="185" r="18" fill="#22c55e"/><circle cx="366" cy="205" r="8" fill="#78350f"/><circle cx="384" cy="205" r="8" fill="#78350f"/>`
+          },
+          {
+            x: 515, y: 295, r: 36,
+            normal: `<ellipse cx="515" cy="295" rx="30" ry="20" fill="#94a3b8" stroke="#475569" stroke-width="4"/>`,
+            diff:   `<ellipse cx="515" cy="295" rx="30" ry="20" fill="#94a3b8" stroke="#475569" stroke-width="4"/><circle cx="515" cy="268" r="14" fill="#ef4444"/><circle cx="510" cy="265" r="3" fill="#fff"/><circle cx="521" cy="268" r="3" fill="#fff"/>`
+          },
+          {
+            x: 390, y: 95, r: 34,
+            normal: `<g fill="#ffffff"><circle cx="375" cy="95" r="18"/><circle cx="395" cy="90" r="22"/><circle cx="412" cy="96" r="16"/></g>`,
+            diff:   `<g fill="#fde047"><circle cx="375" cy="95" r="18"/><circle cx="395" cy="90" r="22"/><circle cx="412" cy="96" r="16"/></g>`
+          }
+        ]
+      },
+      {
+        id: 'park',
+        name: '歡樂遊樂園',
+        emoji: '🎡',
+        bg: `
+          <rect width="600" height="340" fill="#e0f2fe"/>
+          <rect y="255" width="600" height="85" fill="#86efac"/>
+        `,
+        spots: [
+          {
+            x: 155, y: 145, r: 54,
+            normal: `<line x1="155" y1="145" x2="115" y2="255" stroke="#475569" stroke-width="6"/><line x1="155" y1="145" x2="195" y2="255" stroke="#475569" stroke-width="6"/><circle cx="155" cy="145" r="52" fill="none" stroke="#ec4899" stroke-width="7"/><circle cx="155" cy="145" r="14" fill="#facc15"/><circle cx="155" cy="93" r="10" fill="#3b82f6"/><circle cx="207" cy="145" r="10" fill="#22c55e"/><circle cx="155" cy="197" r="10" fill="#f97316"/><circle cx="103" cy="145" r="10" fill="#a855f7"/>`,
+            diff:   `<line x1="155" y1="145" x2="115" y2="255" stroke="#475569" stroke-width="6"/><line x1="155" y1="145" x2="195" y2="255" stroke="#475569" stroke-width="6"/><circle cx="155" cy="145" r="52" fill="none" stroke="#3b82f6" stroke-width="7"/><polygon points="155,127 173,157 137,157" fill="#ef4444"/><circle cx="155" cy="93" r="10" fill="#facc15"/><circle cx="207" cy="145" r="10" fill="#facc15"/><circle cx="155" cy="197" r="10" fill="#facc15"/><circle cx="103" cy="145" r="10" fill="#facc15"/>`
+          },
+          {
+            x: 425, y: 195, r: 54,
+            normal: `<polygon points="355,185 425,115 495,185" fill="#ef4444" stroke="#991b1b" stroke-width="4"/><rect x="368" y="185" width="114" height="72" fill="#fef08a" stroke="#991b1b" stroke-width="4"/><path d="M405,257 L425,205 L445,257 Z" fill="#1e293b"/>`,
+            diff:   `<polygon points="355,185 425,115 495,185" fill="#a855f7" stroke="#581c87" stroke-width="4"/><rect x="368" y="185" width="114" height="72" fill="#bae6fd" stroke="#581c87" stroke-width="4"/><path d="M405,257 L425,205 L445,257 Z" fill="#f97316"/>`
+          },
+          {
+            x: 425, y: 92, r: 34,
+            normal: `<line x1="425" y1="115" x2="425" y2="75" stroke="#1e293b" stroke-width="4"/><polygon points="425,75 462,87 425,98" fill="#facc15"/>`,
+            diff:   `<line x1="425" y1="115" x2="425" y2="75" stroke="#1e293b" stroke-width="4"/><polygon points="425,75 388,87 425,98" fill="#10b981"/>`
+          },
+          {
+            x: 290, y: 120, r: 38,
+            normal: `<line x1="290" y1="145" x2="290" y2="195" stroke="#475569" stroke-width="3"/><circle cx="275" cy="115" r="18" fill="#ef4444"/><circle cx="305" cy="120" r="18" fill="#3b82f6"/>`,
+            diff:   `<line x1="290" y1="145" x2="290" y2="195" stroke="#475569" stroke-width="3"/><circle cx="275" cy="115" r="18" fill="#facc15"/><circle cx="305" cy="120" r="18" fill="#22c55e"/><circle cx="290" cy="98" r="18" fill="#ec4899"/>`
+          },
+          {
+            x: 290, y: 270, r: 40,
+            normal: `<rect x="260" y="250" width="60" height="42" rx="6" fill="#f472b6" stroke="#831843" stroke-width="3"/><circle cx="290" cy="232" r="18" fill="#fde047" stroke="#831843" stroke-width="3"/>`,
+            diff:   `<rect x="260" y="250" width="60" height="42" rx="6" fill="#38bdf8" stroke="#0c4a6e" stroke-width="3"/><circle cx="290" cy="232" r="18" fill="#4ade80" stroke="#0c4a6e" stroke-width="3"/>`
+          },
+          {
+            x: 65, y: 280, r: 36,
+            normal: `<polygon points="52,275 78,275 65,315" fill="#d97706"/><circle cx="65" cy="260" r="18" fill="#f472b6"/>`,
+            diff:   `<polygon points="52,275 78,275 65,315" fill="#d97706"/><circle cx="65" cy="260" r="18" fill="#38bdf8"/><circle cx="65" cy="240" r="7" fill="#ef4444"/>`
+          },
+          {
+            x: 545, y: 280, r: 36,
+            normal: `<rect x="530" y="275" width="30" height="36" rx="4" fill="#3b82f6"/><ellipse cx="545" cy="255" rx="22" ry="18" fill="#f9a8d4"/>`,
+            diff:   `<rect x="530" y="275" width="30" height="36" rx="4" fill="#ef4444"/><ellipse cx="545" cy="255" rx="22" ry="18" fill="#fde047"/>`
+          },
+          {
+            x: 525, y: 75, r: 36,
+            normal: `<circle cx="525" cy="75" r="26" fill="#facc15"/>`,
+            diff:   `<g fill="#ffffff"><circle cx="510" cy="75" r="18"/><circle cx="530" cy="70" r="22"/><circle cx="548" cy="76" r="16"/></g>`
+          }
+        ]
+      },
+      {
+        id: 'forest',
+        name: '森林露營',
+        emoji: '⛺',
+        bg: `
+          <rect width="600" height="340" fill="#1e1b4b"/>
+          <polygon points="40,255 130,115 220,255" fill="#064e3b"/>
+          <polygon points="400,255 495,105 585,255" fill="#064e3b"/>
+          <rect y="250" width="600" height="90" fill="#065f46"/>
+        `,
+        spots: [
+          {
+            x: 95, y: 70, r: 38,
+            normal: `<circle cx="95" cy="70" r="28" fill="#fde047"/><circle cx="108" cy="62" r="22" fill="#1e1b4b"/>`,
+            diff:   `<circle cx="95" cy="70" r="28" fill="#fde047"/>`
+          },
+          {
+            x: 245, y: 210, r: 52,
+            normal: `<polygon points="175,260 245,145 315,260" fill="#f59e0b" stroke="#78350f" stroke-width="4"/><polygon points="220,260 245,195 270,260" fill="#451a03"/>`,
+            diff:   `<polygon points="175,260 245,145 315,260" fill="#10b981" stroke="#064e3b" stroke-width="4"/><polygon points="220,260 245,195 270,260" fill="#fef08a"/>`
+          },
+          {
+            x: 395, y: 275, r: 40,
+            normal: `<rect x="370" y="290" width="50" height="12" rx="4" fill="#78350f"/><path d="M375,290 Q395,235 415,290 Z" fill="#ef4444"/><path d="M383,290 Q395,252 407,290 Z" fill="#facc15"/>`,
+            diff:   `<rect x="370" y="290" width="50" height="12" rx="4" fill="#78350f"/><path d="M375,290 Q395,235 415,290 Z" fill="#38bdf8"/><path d="M383,290 Q395,252 407,290 Z" fill="#e0f2fe"/>`
+          },
+          {
+            x: 130, y: 155, r: 36,
+            normal: `<ellipse cx="130" cy="155" rx="18" ry="22" fill="#a855f7"/><circle cx="123" cy="150" r="6" fill="#fde047"/><circle cx="137" cy="150" r="6" fill="#fde047"/><circle cx="123" cy="150" r="2" fill="#000"/><circle cx="137" cy="150" r="2" fill="#000"/>`,
+            diff:   `<ellipse cx="130" cy="155" rx="18" ry="22" fill="#f97316"/><line x1="118" y1="150" x2="127" y2="150" stroke="#000" stroke-width="3"/><line x1="133" y1="150" x2="142" y2="150" stroke="#000" stroke-width="3"/>`
+          },
+          {
+            x: 515, y: 280, r: 38,
+            normal: `<rect x="507" y="280" width="16" height="28" rx="4" fill="#fef3c7"/><path d="M490,282 A25,22 0 0,1 540,282 Z" fill="#ef4444"/><circle cx="505" cy="272" r="4" fill="#fff"/><circle cx="523" cy="268" r="5" fill="#fff"/>`,
+            diff:   `<rect x="507" y="280" width="16" height="28" rx="4" fill="#fef3c7"/><path d="M490,282 A25,22 0 0,1 540,282 Z" fill="#3b82f6"/><circle cx="505" cy="272" r="4" fill="#fde047"/><circle cx="523" cy="268" r="5" fill="#fde047"/>`
+          },
+          {
+            x: 85, y: 285, r: 38,
+            normal: `<rect x="65" y="265" width="40" height="44" rx="10" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3"/><rect x="73" y="278" width="24" height="18" rx="4" fill="#93c5fd"/>`,
+            diff:   `<rect x="65" y="265" width="40" height="44" rx="10" fill="#ec4899" stroke="#831843" stroke-width="3"/><circle cx="85" cy="287" r="10" fill="#fef08a"/>`
+          },
+          {
+            x: 310, y: 75, r: 36,
+            normal: `<circle cx="290" cy="70" r="6" fill="#fde047"/><circle cx="315" cy="85" r="7" fill="#fde047"/><circle cx="330" cy="65" r="5" fill="#fde047"/>`,
+            diff:   `<polygon points="310,55 316,70 332,72 320,82 324,98 310,88 296,98 300,82 288,72 304,70" fill="#f472b6"/>`
+          },
+          {
+            x: 495, y: 75, r: 36,
+            normal: `<g fill="#475569"><circle cx="480" cy="75" r="16"/><circle cx="498" cy="70" r="20"/><circle cx="515" cy="76" r="15"/></g>`,
+            diff:   `<circle cx="495" cy="75" r="18" fill="#38bdf8" stroke="#e0f2fe" stroke-width="4"/>`
+          }
+        ]
+      },
+      {
+        id: 'beach',
+        name: '陽光海灘',
+        emoji: '🏖️',
+        bg: `
+          <rect width="600" height="340" fill="#7dd3fc"/>
+          <rect y="185" width="600" height="55" fill="#0284c7"/>
+          <rect y="235" width="600" height="105" fill="#fde047"/>
+        `,
+        spots: [
+          {
+            x: 85, y: 65, r: 38,
+            normal: `<circle cx="85" cy="65" r="30" fill="#facc15" stroke="#f97316" stroke-width="6"/>`,
+            diff:   `<circle cx="85" cy="65" r="30" fill="#f97316" stroke="#dc2626" stroke-width="6"/>`
+          },
+          {
+            x: 135, y: 235, r: 50,
+            normal: `<line x1="135" y1="190" x2="135" y2="285" stroke="#78350f" stroke-width="6"/><path d="M80,210 A55,42 0 0,1 190,210 Z" fill="#ef4444" stroke="#ffffff" stroke-width="4"/>`,
+            diff:   `<line x1="135" y1="190" x2="135" y2="285" stroke="#78350f" stroke-width="6"/><path d="M80,210 A55,42 0 0,1 190,210 Z" fill="#a855f7" stroke="#fde047" stroke-width="4"/>`
+          },
+          {
+            x: 295, y: 275, r: 44,
+            normal: `<rect x="260" y="265" width="70" height="42" fill="#d97706" stroke="#92400e" stroke-width="3"/><rect x="280" y="240" width="30" height="26" fill="#f59e0b" stroke="#92400e" stroke-width="3"/><line x1="295" y1="240" x2="295" y2="215" stroke="#78350f" stroke-width="3"/><polygon points="295,215 320,223 295,230" fill="#ef4444"/>`,
+            diff:   `<rect x="260" y="265" width="70" height="42" fill="#d97706" stroke="#92400e" stroke-width="3"/><rect x="280" y="240" width="30" height="26" fill="#f59e0b" stroke="#92400e" stroke-width="3"/><line x1="295" y1="240" x2="295" y2="215" stroke="#78350f" stroke-width="3"/><polygon points="295,215 270,223 295,230" fill="#3b82f6"/>`
+          },
+          {
+            x: 410, y: 155, r: 44,
+            normal: `<polygon points="375,180 445,180 432,198 388,198" fill="#78350f"/><polygon points="410,115 410,178 442,178" fill="#ffffff"/><polygon points="406,125 406,178 380,178" fill="#ef4444"/>`,
+            diff:   `<polygon points="375,180 445,180 432,198 388,198" fill="#78350f"/><polygon points="410,115 410,178 442,178" fill="#facc15"/><polygon points="406,125 406,178 380,178" fill="#22c55e"/>`
+          },
+          {
+            x: 470, y: 285, r: 36,
+            normal: `<circle cx="470" cy="285" r="24" fill="#ef4444" stroke="#ffffff" stroke-width="4"/><circle cx="470" cy="285" r="10" fill="#facc15"/>`,
+            diff:   `<circle cx="470" cy="285" r="24" fill="#3b82f6" stroke="#ffffff" stroke-width="4"/><rect x="458" y="273" width="24" height="24" fill="#4ade80"/>`
+          },
+          {
+            x: 525, y: 225, r: 44,
+            normal: `<rect x="520" y="160" width="12" height="90" fill="#78350f"/><ellipse cx="495" cy="160" rx="28" ry="12" fill="#16a34a"/><ellipse cx="555" cy="160" rx="28" ry="12" fill="#16a34a"/>`,
+            diff:   `<rect x="520" y="160" width="12" height="90" fill="#78350f"/><ellipse cx="495" cy="160" rx="28" ry="12" fill="#16a34a"/><ellipse cx="555" cy="160" rx="28" ry="12" fill="#16a34a"/><circle cx="515" cy="175" r="9" fill="#451a03"/><circle cx="535" cy="175" r="9" fill="#451a03"/>`
+          },
+          {
+            x: 205, y: 295, r: 34,
+            normal: `<ellipse cx="205" cy="295" rx="22" ry="15" fill="#ef4444"/><circle cx="192" cy="280" r="6" fill="#ef4444"/><circle cx="218" cy="280" r="6" fill="#ef4444"/>`,
+            diff:   `<ellipse cx="205" cy="295" rx="22" ry="15" fill="#38bdf8"/><circle cx="192" cy="280" r="6" fill="#38bdf8"/><circle cx="218" cy="280" r="6" fill="#38bdf8"/>`
+          },
+          {
+            x: 265, y: 75, r: 36,
+            normal: `<path d="M245,78 Q255,62 265,78 Q275,62 285,78" fill="none" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>`,
+            diff:   `<g fill="#ffffff"><circle cx="250" cy="75" r="16"/><circle cx="268" cy="70" r="20"/><circle cx="285" cy="76" r="15"/></g>`
+          }
+        ]
+      },
+      {
+        id: 'candy',
+        name: '甜點王國',
+        emoji: '🍩',
+        bg: `
+          <rect width="600" height="340" fill="#fdf2f8"/>
+          <ellipse cx="300" cy="315" rx="340" ry="65" fill="#fbcfe8"/>
+        `,
+        spots: [
+          {
+            x: 300, y: 195, r: 54,
+            normal: `<rect x="245" y="190" width="110" height="75" rx="10" fill="#fef08a" stroke="#be185d" stroke-width="4"/><rect x="265" y="140" width="70" height="50" rx="8" fill="#f472b6" stroke="#be185d" stroke-width="4"/><circle cx="300" cy="122" r="14" fill="#ef4444"/>`,
+            diff:   `<rect x="245" y="190" width="110" height="75" rx="10" fill="#a7f3d0" stroke="#065f46" stroke-width="4"/><rect x="265" y="140" width="70" height="50" rx="8" fill="#38bdf8" stroke="#065f46" stroke-width="4"/><polygon points="300,104 316,134 284,134" fill="#facc15"/>`
+          },
+          {
+            x: 115, y: 225, r: 44,
+            normal: `<polygon points="90,220 140,220 115,295" fill="#d97706" stroke="#78350f" stroke-width="4"/><circle cx="115" cy="195" r="32" fill="#f472b6" stroke="#831843" stroke-width="4"/>`,
+            diff:   `<polygon points="90,220 140,220 115,295" fill="#d97706" stroke="#78350f" stroke-width="4"/><circle cx="115" cy="195" r="32" fill="#4ade80" stroke="#064e3b" stroke-width="4"/>`
+          },
+          {
+            x: 485, y: 225, r: 44,
+            normal: `<line x1="485" y1="225" x2="485" y2="295" stroke="#e2e8f0" stroke-width="8"/><circle cx="485" cy="195" r="34" fill="#ef4444" stroke="#991b1b" stroke-width="4"/><circle cx="485" cy="195" r="16" fill="none" stroke="#ffffff" stroke-width="5"/>`,
+            diff:   `<line x1="485" y1="225" x2="485" y2="295" stroke="#e2e8f0" stroke-width="8"/><circle cx="485" cy="195" r="34" fill="#a855f7" stroke="#581c87" stroke-width="4"/><circle cx="485" cy="195" r="16" fill="none" stroke="#fde047" stroke-width="5"/>`
+          },
+          {
+            x: 195, y: 110, r: 40,
+            normal: `<circle cx="195" cy="110" r="32" fill="#f59e0b" stroke="#78350f" stroke-width="4"/><circle cx="195" cy="110" r="24" fill="#ec4899"/><circle cx="195" cy="110" r="10" fill="#fdf2f8"/>`,
+            diff:   `<circle cx="195" cy="110" r="32" fill="#f59e0b" stroke="#78350f" stroke-width="4"/><circle cx="195" cy="110" r="24" fill="#38bdf8"/><circle cx="195" cy="110" r="10" fill="#fdf2f8"/>`
+          },
+          {
+            x: 410, y: 110, r: 40,
+            normal: `<polygon points="385,120 435,120 425,155 395,155" fill="#3b82f6"/><circle cx="410" cy="102" r="26" fill="#fde047"/><circle cx="410" cy="76" r="9" fill="#ef4444"/>`,
+            diff:   `<polygon points="385,120 435,120 425,155 395,155" fill="#ef4444"/><circle cx="410" cy="102" r="26" fill="#c084fc"/>`
+          },
+          {
+            x: 85, y: 80, r: 36,
+            normal: `<g fill="#f9a8d4"><circle cx="70" cy="80" r="18"/><circle cx="90" cy="74" r="22"/><circle cx="108" cy="82" r="16"/></g>`,
+            diff:   `<g fill="#7dd3fc"><circle cx="70" cy="80" r="18"/><circle cx="90" cy="74" r="22"/><circle cx="108" cy="82" r="16"/></g>`
+          },
+          {
+            x: 515, y: 80, r: 36,
+            normal: `<polygon points="475,65 495,80 475,95" fill="#ec4899"/><polygon points="555,65 535,80 555,95" fill="#ec4899"/><circle cx="515" cy="80" r="20" fill="#facc15" stroke="#be185d" stroke-width="4"/>`,
+            diff:   `<polygon points="475,65 495,80 475,95" fill="#22c55e"/><polygon points="555,65 535,80 555,95" fill="#22c55e"/><circle cx="515" cy="80" r="20" fill="#38bdf8" stroke="#065f46" stroke-width="4"/>`
+          },
+          {
+            x: 205, y: 285, r: 34,
+            normal: `<circle cx="205" cy="285" r="22" fill="#d97706" stroke="#78350f" stroke-width="3"/><circle cx="197" cy="279" r="4" fill="#451a03"/><circle cx="213" cy="282" r="4" fill="#451a03"/><circle cx="204" cy="293" r="4" fill="#451a03"/>`,
+            diff:   `<rect x="183" y="265" width="44" height="38" rx="6" fill="#78350f" stroke="#451a03" stroke-width="3"/><line x1="183" y1="284" x2="227" y2="284" stroke="#451a03" stroke-width="3"/><line x1="205" y1="265" x2="205" y2="303" stroke="#451a03" stroke-width="3"/>`
+          }
+        ]
+      },
+      {
+        id: 'city',
+        name: '交通小鎮',
+        emoji: '🚒',
+        bg: `
+          <rect width="600" height="340" fill="#bae6fd"/>
+          <rect x="60" y="95" width="90" height="145" fill="#94a3b8" stroke="#475569" stroke-width="3"/>
+          <rect x="440" y="80" width="100" height="160" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+          <rect y="240" width="600" height="100" fill="#334155"/>
+          <line x1="20" y1="290" x2="90" y2="290" stroke="#facc15" stroke-width="6"/>
+          <line x1="260" y1="290" x2="340" y2="290" stroke="#facc15" stroke-width="6"/>
+          <line x1="510" y1="290" x2="580" y2="290" stroke="#facc15" stroke-width="6"/>
+        `,
+        spots: [
+          {
+            x: 315, y: 185, r: 38,
+            normal: `<rect x="311" y="195" width="8" height="48" fill="#1e293b"/><rect x="298" y="135" width="34" height="62" rx="8" fill="#1e293b"/><circle cx="315" cy="150" r="8" fill="#ef4444"/><circle cx="315" cy="182" r="8" fill="#475569"/>`,
+            diff:   `<rect x="311" y="195" width="8" height="48" fill="#1e293b"/><rect x="298" y="135" width="34" height="62" rx="8" fill="#1e293b"/><circle cx="315" cy="150" r="8" fill="#475569"/><circle cx="315" cy="182" r="8" fill="#22c55e"/>`
+          },
+          {
+            x: 165, y: 265, r: 48,
+            normal: `<rect x="110" y="235" width="110" height="52" rx="10" fill="#ef4444" stroke="#7f1d1d" stroke-width="4"/><rect x="180" y="245" width="30" height="22" rx="4" fill="#bae6fd"/><circle cx="135" cy="290" r="14" fill="#1e293b" stroke="#e2e8f0" stroke-width="4"/><circle cx="195" cy="290" r="14" fill="#1e293b" stroke="#e2e8f0" stroke-width="4"/>`,
+            diff:   `<rect x="110" y="235" width="110" height="52" rx="10" fill="#facc15" stroke="#854d0e" stroke-width="4"/><rect x="180" y="245" width="30" height="22" rx="4" fill="#bae6fd"/><circle cx="135" cy="290" r="14" fill="#1e293b" stroke="#e2e8f0" stroke-width="4"/><circle cx="195" cy="290" r="14" fill="#1e293b" stroke="#e2e8f0" stroke-width="4"/>`
+          },
+          {
+            x: 425, y: 270, r: 44,
+            normal: `<rect x="385" y="250" width="80" height="40" rx="12" fill="#3b82f6" stroke="#1e3a8a" stroke-width="4"/><circle cx="405" cy="292" r="12" fill="#1e293b" stroke="#e2e8f0" stroke-width="3"/><circle cx="445" cy="292" r="12" fill="#1e293b" stroke="#e2e8f0" stroke-width="3"/>`,
+            diff:   `<rect x="385" y="250" width="80" height="40" rx="12" fill="#10b981" stroke="#064e3b" stroke-width="4"/><circle cx="405" cy="292" r="12" fill="#1e293b" stroke="#e2e8f0" stroke-width="3"/><circle cx="445" cy="292" r="12" fill="#1e293b" stroke="#e2e8f0" stroke-width="3"/>`
+          },
+          {
+            x: 245, y: 65, r: 42,
+            normal: `<ellipse cx="245" cy="68" rx="34" ry="18" fill="#ef4444" stroke="#7f1d1d" stroke-width="3"/><line x1="215" y1="45" x2="275" y2="45" stroke="#1e293b" stroke-width="5"/><line x1="245" y1="45" x2="245" y2="52" stroke="#1e293b" stroke-width="5"/>`,
+            diff:   `<ellipse cx="245" cy="68" rx="38" ry="20" fill="#a855f7" stroke="#581c87" stroke-width="3"/><rect x="235" y="88" width="20" height="12" fill="#facc15"/>`
+          },
+          {
+            x: 105, y: 145, r: 38,
+            normal: `<rect x="78" y="120" width="20" height="22" fill="#fef08a"/><rect x="112" y="120" width="20" height="22" fill="#fef08a"/><rect x="78" y="155" width="20" height="22" fill="#fef08a"/><rect x="112" y="155" width="20" height="22" fill="#fef08a"/>`,
+            diff:   `<rect x="78" y="120" width="20" height="22" fill="#38bdf8"/><rect x="112" y="120" width="20" height="22" fill="#38bdf8"/><rect x="78" y="155" width="20" height="22" fill="#ef4444"/><rect x="112" y="155" width="20" height="22" fill="#ef4444"/>`
+          },
+          {
+            x: 490, y: 125, r: 36,
+            normal: `<circle cx="490" cy="125" r="22" fill="#ffffff" stroke="#1e293b" stroke-width="4"/><line x1="490" y1="125" x2="490" y2="110" stroke="#1e293b" stroke-width="4"/><line x1="490" y1="125" x2="504" y2="125" stroke="#ef4444" stroke-width="4"/>`,
+            diff:   `<circle cx="490" cy="125" r="22" fill="#fef08a" stroke="#1e293b" stroke-width="4"/><line x1="490" y1="125" x2="490" y2="140" stroke="#1e293b" stroke-width="4"/><line x1="490" y1="125" x2="476" y2="125" stroke="#ef4444" stroke-width="4"/>`
+          },
+          {
+            x: 215, y: 185, r: 36,
+            normal: `<rect x="208" y="185" width="14" height="55" fill="#78350f"/><circle cx="215" cy="170" r="26" fill="#22c55e"/>`,
+            diff:   `<rect x="208" y="185" width="14" height="55" fill="#78350f"/><circle cx="215" cy="170" r="26" fill="#f97316"/>`
+          },
+          {
+            x: 385, y: 65, r: 36,
+            normal: `<circle cx="385" cy="65" r="24" fill="#facc15"/>`,
+            diff:   `<g fill="#ffffff"><circle cx="370" cy="65" r="16"/><circle cx="388" cy="60" r="20"/><circle cx="405" cy="66" r="15"/></g>`
+          }
+        ]
+      },
+      {
+        id: 'castle',
+        name: '魔法城堡',
+        emoji: '🏰',
+        bg: `
+          <rect width="600" height="340" fill="#312e81"/>
+          <ellipse cx="300" cy="315" rx="340" ry="70" fill="#15803d"/>
+          <rect x="195" y="135" width="210" height="145" fill="#e2e8f0" stroke="#475569" stroke-width="4"/>
+          <rect x="145" y="115" width="55" height="165" fill="#cbd5e1" stroke="#475569" stroke-width="4"/>
+          <rect x="400" y="115" width="55" height="165" fill="#cbd5e1" stroke="#475569" stroke-width="4"/>
+          <polygon points="138,115 172,60 206,115" fill="#ec4899" stroke="#831843" stroke-width="3"/>
+          <polygon points="394,115 428,60 462,115" fill="#ec4899" stroke="#831843" stroke-width="3"/>
+        `,
+        spots: [
+          {
+            x: 172, y: 42, r: 34,
+            normal: `<line x1="172" y1="60" x2="172" y2="28" stroke="#ffffff" stroke-width="3"/><polygon points="172,28 202,36 172,45" fill="#facc15"/>`,
+            diff:   `<line x1="172" y1="60" x2="172" y2="28" stroke="#ffffff" stroke-width="3"/><polygon points="172,28 142,36 172,45" fill="#38bdf8"/>`
+          },
+          {
+            x: 428, y: 42, r: 34,
+            normal: `<line x1="428" y1="60" x2="428" y2="28" stroke="#ffffff" stroke-width="3"/><polygon points="428,28 458,36 428,45" fill="#facc15"/>`,
+            diff:   `<line x1="428" y1="60" x2="428" y2="28" stroke="#ffffff" stroke-width="3"/><polygon points="428,28 398,36 428,45" fill="#4ade80"/>`
+          },
+          {
+            x: 300, y: 235, r: 44,
+            normal: `<path d="M270,280 L270,215 A30,30 0 0,1 330,215 L330,280 Z" fill="#78350f" stroke="#451a03" stroke-width="4"/><circle cx="318" cy="248" r="5" fill="#facc15"/>`,
+            diff:   `<path d="M270,280 L270,215 A30,30 0 0,1 330,215 L330,280 Z" fill="#3b82f6" stroke="#1e3a8a" stroke-width="4"/><circle cx="282" cy="248" r="5" fill="#facc15"/>`
+          },
+          {
+            x: 300, y: 165, r: 34,
+            normal: `<circle cx="300" cy="165" r="20" fill="#fef08a" stroke="#475569" stroke-width="4"/>`,
+            diff:   `<rect x="280" y="147" width="40" height="36" rx="4" fill="#ec4899" stroke="#475569" stroke-width="4"/>`
+          },
+          {
+            x: 75, y: 115, r: 42,
+            normal: `<circle cx="75" cy="115" r="28" fill="#22c55e" stroke="#064e3b" stroke-width="4"/><polygon points="55,95 65,72 78,92" fill="#f97316"/><circle cx="68" cy="110" r="4" fill="#000"/><circle cx="85" cy="110" r="4" fill="#000"/>`,
+            diff:   `<circle cx="75" cy="115" r="28" fill="#ef4444" stroke="#7f1d1d" stroke-width="4"/><polygon points="55,95 65,72 78,92" fill="#facc15"/><circle cx="68" cy="110" r="4" fill="#fff"/><circle cx="85" cy="110" r="4" fill="#fff"/>`
+          },
+          {
+            x: 525, y: 115, r: 40,
+            normal: `<polygon points="500,115 525,65 550,115" fill="#8b5cf6" stroke="#fde047" stroke-width="3"/><ellipse cx="525" cy="115" rx="34" ry="10" fill="#8b5cf6" stroke="#fde047" stroke-width="3"/>`,
+            diff:   `<polygon points="500,115 525,65 550,115" fill="#f97316" stroke="#ffffff" stroke-width="3"/><ellipse cx="525" cy="115" rx="34" ry="10" fill="#f97316" stroke="#ffffff" stroke-width="3"/>`
+          },
+          {
+            x: 115, y: 280, r: 38,
+            normal: `<ellipse cx="115" cy="285" rx="28" ry="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/><circle cx="95" cy="272" r="16" fill="#ffffff"/><polygon points="82,255 95,235 102,258" fill="#facc15"/>`,
+            diff:   `<ellipse cx="115" cy="285" rx="28" ry="18" fill="#f9a8d4" stroke="#ec4899" stroke-width="3"/><circle cx="95" cy="272" r="16" fill="#f9a8d4"/><polygon points="82,255 95,235 102,258" fill="#38bdf8"/>`
+          },
+          {
+            x: 495, y: 285, r: 36,
+            normal: `<polygon points="475,270 515,270 508,305 482,305" fill="#475569" stroke="#1e293b" stroke-width="3"/><ellipse cx="495" cy="270" rx="20" ry="8" fill="#22c55e"/>`,
+            diff:   `<polygon points="475,270 515,270 508,305 482,305" fill="#475569" stroke="#1e293b" stroke-width="3"/><ellipse cx="495" cy="270" rx="20" ry="8" fill="#f43f5e"/>`
+          }
+        ]
+      },
+      {
+        id: 'snow',
+        name: '冰雪奇境',
+        emoji: '⛄',
+        bg: `
+          <rect width="600" height="340" fill="#38bdf8"/>
+          <polygon points="50,245 170,95 290,245" fill="#e0f2fe"/>
+          <polygon points="330,245 455,85 575,245" fill="#f0f9ff"/>
+          <rect y="235" width="600" height="105" fill="#ffffff"/>
+        `,
+        spots: [
+          {
+            x: 295, y: 215, r: 48,
+            normal: `<circle cx="295" cy="240" r="32" fill="#ffffff" stroke="#94a3b8" stroke-width="3"/><circle cx="295" cy="192" r="22" fill="#ffffff" stroke="#94a3b8" stroke-width="3"/><rect x="275" y="155" width="40" height="20" fill="#1e293b"/><rect x="268" y="172" width="54" height="6" fill="#ef4444"/><polygon points="295,192 318,196 295,200" fill="#f97316"/>`,
+            diff:   `<circle cx="295" cy="240" r="32" fill="#ffffff" stroke="#94a3b8" stroke-width="3"/><circle cx="295" cy="192" r="22" fill="#ffffff" stroke="#94a3b8" stroke-width="3"/><polygon points="272,175 295,142 318,175" fill="#ef4444"/><circle cx="295" cy="140" r="7" fill="#ffffff"/><polygon points="295,192 272,196 295,200" fill="#f97316"/>`
+          },
+          {
+            x: 295, y: 235, r: 30,
+            normal: `<rect x="275" y="208" width="40" height="10" rx="4" fill="#ef4444"/><rect x="302" y="212" width="10" height="24" rx="4" fill="#ef4444"/><circle cx="295" cy="232" r="4" fill="#1e293b"/><circle cx="295" cy="248" r="4" fill="#1e293b"/>`,
+            diff:   `<rect x="275" y="208" width="40" height="10" rx="4" fill="#22c55e"/><rect x="278" y="212" width="10" height="24" rx="4" fill="#22c55e"/><circle cx="295" cy="232" r="4" fill="#f59e0b"/><circle cx="295" cy="248" r="4" fill="#f59e0b"/>`
+          },
+          {
+            x: 120, y: 245, r: 44,
+            normal: `<ellipse cx="120" cy="250" rx="24" ry="30" fill="#1e293b"/><ellipse cx="120" cy="254" rx="14" ry="22" fill="#ffffff"/><circle cx="112" cy="234" r="3" fill="#fff"/><circle cx="128" cy="234" r="3" fill="#fff"/><polygon points="115,240 125,240 120,248" fill="#facc15"/>`,
+            diff:   `<ellipse cx="120" cy="250" rx="24" ry="30" fill="#3b82f6"/><ellipse cx="120" cy="254" rx="14" ry="22" fill="#ffffff"/><circle cx="112" cy="234" r="3" fill="#fff"/><circle cx="128" cy="234" r="3" fill="#fff"/><polygon points="115,240 125,240 120,248" fill="#ef4444"/>`
+          },
+          {
+            x: 485, y: 245, r: 46,
+            normal: `<path d="M440,265 A45,42 0 0,1 530,265 Z" fill="#bae6fd" stroke="#0284c7" stroke-width="4"/><path d="M470,265 A15,18 0 0,1 500,265 Z" fill="#0c4a6e"/>`,
+            diff:   `<path d="M440,265 A45,42 0 0,1 530,265 Z" fill="#fde047" stroke="#ca8a04" stroke-width="4"/><path d="M470,265 A15,18 0 0,1 500,265 Z" fill="#78350f"/>`
+          },
+          {
+            x: 205, y: 285, r: 36,
+            normal: `<rect x="185" y="268" width="40" height="36" fill="#ef4444" stroke="#991b1b" stroke-width="3"/><line x1="205" y1="268" x2="205" y2="304" stroke="#facc15" stroke-width="6"/><line x1="185" y1="286" x2="225" y2="286" stroke="#facc15" stroke-width="6"/>`,
+            diff:   `<rect x="185" y="268" width="40" height="36" fill="#a855f7" stroke="#581c87" stroke-width="3"/><line x1="205" y1="268" x2="205" y2="304" stroke="#4ade80" stroke-width="6"/><line x1="185" y1="286" x2="225" y2="286" stroke="#4ade80" stroke-width="6"/>`
+          },
+          {
+            x: 400, y: 290, r: 36,
+            normal: `<rect x="394" y="295" width="12" height="22" fill="#78350f"/><polygon points="375,295 400,250 425,295" fill="#16a34a"/><circle cx="400" cy="246" r="6" fill="#facc15"/>`,
+            diff:   `<rect x="394" y="295" width="12" height="22" fill="#78350f"/><polygon points="375,295 400,250 425,295" fill="#16a34a"/><circle cx="392" cy="275" r="5" fill="#ef4444"/><circle cx="408" cy="285" r="5" fill="#ef4444"/>`
+          },
+          {
+            x: 95, y: 70, r: 36,
+            normal: `<circle cx="95" cy="70" r="24" fill="#fef08a"/>`,
+            diff:   `<circle cx="95" cy="70" r="24" fill="#f9a8d4"/>`
+          },
+          {
+            x: 515, y: 75, r: 36,
+            normal: `<g fill="#ffffff"><circle cx="500" cy="75" r="16"/><circle cx="518" cy="70" r="20"/><circle cx="535" cy="76" r="15"/></g>`,
+            diff:   `<circle cx="515" cy="75" r="16" fill="#ffffff"/><circle cx="515" cy="75" r="24" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="6,6"/>`
+          }
+        ]
+      }
+    ];
+
+    // ====== 遊戲狀態 ======
+    const state = {
+      sceneIdx: 0,
+      targetCount: 3,         // 3 | 5 | 7
+      activeDiffIndices: [],  // 存放本局被選為「不同點」的 spot 索引
+      foundSet: new Set(),    // 已找出的 spot 索引
+      mistakes: 0,
+      startTimeMs: 0,
+      elapsedMs: 0,
+      timerId: null,
+      isPlaying: false
+    };
+
+    // ====== 首頁場景畫廊初始化 ======
+    function renderSceneGallery() {
+      const container = document.getElementById('sceneGallery');
+      container.innerHTML = '';
+
+      SCENES.forEach((sc, idx) => {
+        const card = document.createElement('div');
+        card.className = `scene-card ${state.sceneIdx === idx ? 'selected' : ''}`;
+        card.innerHTML = `
+          <span class="scene-emoji">${sc.emoji}</span>
+          <span class="scene-name">${idx + 1}. ${sc.name}</span>
+        `;
+        card.addEventListener('click', () => {
+          state.sceneIdx = idx;
+          renderSceneGallery();
+          updateBestRecordUI();
+        });
+        container.appendChild(card);
+      });
+    }
+
+    function getBestKey() {
+      return `spotdiff_best_s${state.sceneIdx}_c${state.targetCount}`;
+    }
+
+    function updateBestRecordUI() {
+      const sc = SCENES[state.sceneIdx];
+      document.getElementById('bestRecordLabel').textContent = `【${sc.name}】找 ${state.targetCount} 個最快紀錄`;
+      const raw = localStorage.getItem(getBestKey());
+      document.getElementById('bestRecordValue').textContent = raw ? `${parseFloat(raw).toFixed(1)} 秒` : '尚無紀錄';
+    }
+
+    // ====== 畫面切換 ======
+    const screens = {
+      start: document.getElementById('startScreen'),
+      game: document.getElementById('gameScreen'),
+      result: document.getElementById('resultScreen')
+    };
+
+    function switchScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    // ====== 開始遊戲（隨機抽取 N 個差異點，每次玩都不一樣！） ======
+    function startGame() {
+      sfx.init();
+      clearInterval(state.timerId);
+
+      const sc = SCENES[state.sceneIdx];
+      const totalSpots = sc.spots.length; // 8 個候選差異點
+      const indices = Array.from({ length: totalSpots }, (_, i) => i);
+
+      // 隨機洗牌抽出 targetCount (3/5/7) 個作為本局的不同處
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      state.activeDiffIndices = indices.slice(0, state.targetCount);
+      state.foundSet = new Set();
+      state.mistakes = 0;
+      state.elapsedMs = 0;
+      state.isPlaying = true;
+      state.startTimeMs = performance.now();
+
+      renderSceneBoards();
+      updateHud();
+      document.getElementById('hudTime').textContent = '0.0s';
+      switchScreen('game');
+
+      state.timerId = setInterval(() => {
+        if (!state.isPlaying) return;
+        state.elapsedMs = performance.now() - state.startTimeMs;
+        document.getElementById('hudTime').textContent = `${(state.elapsedMs / 1000).toFixed(1)}s`;
+      }, 100);
+    }
+
+    // 組合上圖 (全部繪製 normal) 與下圖 (被抽中的點繪製 diff)
+    function renderSceneBoards() {
+      const sc = SCENES[state.sceneIdx];
+      const diffSet = new Set(state.activeDiffIndices);
+
+      let topSpotsHtml = '';
+      let bottomSpotsHtml = '';
+
+      sc.spots.forEach((sp, idx) => {
+        topSpotsHtml += `<g data-spot="${idx}">${sp.normal}</g>`;
+        const isDiff = diffSet.has(idx);
+        bottomSpotsHtml += `<g data-spot="${idx}">${isDiff ? sp.diff : sp.normal}</g>`;
+      });
+
+      const topSvg = `<svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg">${sc.bg}${topSpotsHtml}</svg>`;
+      const bottomSvg = `<svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg">${sc.bg}${bottomSpotsHtml}</svg>`;
+
+      document.getElementById('topSvgHolder').innerHTML = topSvg;
+      document.getElementById('bottomSvgHolder').innerHTML = bottomSvg;
+      document.getElementById('topOverlay').innerHTML = '';
+      document.getElementById('bottomOverlay').innerHTML = '';
+    }
+
+    // ====== 點擊偵測邏輯（支援點擊上圖或下圖） ======
+    function handlePanelClick(e, panelEl) {
+      if (!state.isPlaying) return;
+
+      const rect = panelEl.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      // 換算回 600 x 340 的 SVG 座標
+      const svgX = (clickX / rect.width) * 600;
+      const svgY = (clickY / rect.height) * 340;
+
+      const sc = SCENES[state.sceneIdx];
+      let hitDiffIdx = -1;
+
+      for (const spotIdx of state.activeDiffIndices) {
+        if (state.foundSet.has(spotIdx)) continue;
+        const sp = sc.spots[spotIdx];
+        const dist = Math.hypot(svgX - sp.x, svgY - sp.y);
+        // 寬容點擊判定半徑，讓小朋友手指更容易點中
+        if (dist <= sp.r + 12) {
+          hitDiffIdx = spotIdx;
+          break;
+        }
+      }
+
+      if (hitDiffIdx !== -1) {
+        // 找到了！同時在上下兩張圖標上綠色光圈
+        state.foundSet.add(hitDiffIdx);
+        sfx.found();
+        const sp = sc.spots[hitDiffIdx];
+        addFoundRing(sp.x, sp.y);
+        updateHud();
+
+        if (state.foundSet.size >= state.targetCount) {
+          onAllFound();
+        }
+      } else {
+        // 若點在已經找過的位置上，不扣分也不顯示紅叉
+        for (const spotIdx of state.foundSet) {
+          const sp = sc.spots[spotIdx];
+          if (Math.hypot(svgX - sp.x, svgY - sp.y) <= sp.r + 10) {
+            return;
+          }
+        }
+
+        // 點錯地方：顯示短暫紅叉提醒
+        state.mistakes++;
+        sfx.miss();
+        updateHud();
+        addMissCross(panelEl.querySelector('.overlay-layer'), (svgX / 600) * 100, (svgY / 340) * 100);
+      }
+    }
+
+    function addFoundRing(svgX, svgY) {
+      const leftPct = (svgX / 600) * 100;
+      const topPct = (svgY / 340) * 100;
+
+      ['topOverlay', 'bottomOverlay'].forEach(id => {
+        const ring = document.createElement('div');
+        ring.className = 'found-ring';
+        ring.style.left = `${leftPct}%`;
+        ring.style.top = `${topPct}%`;
+        document.getElementById(id).appendChild(ring);
+      });
+    }
+
+    function addMissCross(overlayEl, leftPct, topPct) {
+      const cross = document.createElement('div');
+      cross.className = 'miss-cross';
+      cross.textContent = '✖';
+      cross.style.left = `${leftPct}%`;
+      cross.style.top = `${topPct}%`;
+      overlayEl.appendChild(cross);
+      setTimeout(() => cross.remove(), 550);
+    }
+
+    function updateHud() {
+      const foundCount = state.foundSet.size;
+      document.getElementById('hudProgressLabel').textContent = `已找出 ${foundCount} / ${state.targetCount} 處不同`;
+      document.getElementById('hudMistakes').textContent = `${state.mistakes}`;
+
+      const dotsContainer = document.getElementById('diffDots');
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < state.targetCount; i++) {
+        const dot = document.createElement('span');
+        dot.className = `diff-dot ${i < foundCount ? 'found' : ''}`;
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function onAllFound() {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      sfx.win();
+
+      const totalSec = Number((state.elapsedMs / 1000).toFixed(1));
+      const key = getBestKey();
+      const prev = localStorage.getItem(key);
+      let isNewRecord = false;
+      if (!prev || totalSec < parseFloat(prev)) {
+        localStorage.setItem(key, String(totalSec));
+        isNewRecord = true;
+      }
+
+      let stars = 3;
+      if (state.mistakes >= 5) stars = 1;
+      else if (state.mistakes >= 2) stars = 2;
+
+      setTimeout(() => {
+        document.getElementById('resultBadge').textContent = isNewRecord ? '🏆 刷新最快找碴紀錄！' : '🎉 全部找出來了！';
+        document.getElementById('resultStarsBig').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+        document.getElementById('statTime').textContent = `${totalSec.toFixed(1)} 秒`;
+        document.getElementById('statMistakes').textContent = `${state.mistakes} 次`;
+        updateBestRecordUI();
+        switchScreen('result');
+      }, 550);
+    }
+
+    // ====== 事件綁定 ======
+    document.getElementById('topPanel').addEventListener('pointerdown', (e) => {
+      handlePanelClick(e, e.currentTarget);
+    });
+
+    document.getElementById('bottomPanel').addEventListener('pointerdown', (e) => {
+      handlePanelClick(e, e.currentTarget);
+    });
+
+    document.getElementById('countSelector').addEventListener('click', (e) => {
+      const card = e.target.closest('.option-card');
+      if (!card) return;
+      document.querySelectorAll('#countSelector .option-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.targetCount = Number(card.dataset.count);
+      updateBestRecordUI();
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('retrySameBtn').addEventListener('click', startGame);
+    document.getElementById('nextSceneBtn').addEventListener('click', () => {
+      state.sceneIdx = (state.sceneIdx + 1) % SCENES.length;
+      renderSceneGallery();
+      updateBestRecordUI();
+      startGame();
+    });
+
+    document.getElementById('quitBtn').addEventListener('click', () => {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      switchScreen('start');
+    });
+
+    document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+      sfx.enabled = !sfx.enabled;
+      e.currentTarget.textContent = sfx.enabled ? '🔊' : '🔇';
+    });
+
+    renderSceneGallery();
+    updateBestRecordUI();
+  </script>
+</body>
+</html>
