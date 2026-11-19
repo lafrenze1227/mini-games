@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>記憶翻牌小達人 - 專注力與記憶配對挑戰</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #161e31 100%);
+      --card-bg: #1e293b;
+      --surface: #0f172a;
+      --surface-hover: #263449;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: rgba(99, 102, 241, 0.18);
+      --secondary: #10b981;
+      --secondary-light: rgba(16, 185, 129, 0.18);
+      --accent: #f59e0b;
+      --accent-light: rgba(245, 158, 11, 0.18);
+      --danger: #ef4444;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --shadow-lg: 0 20px 28px -5px rgba(0, 0, 0, 0.55), 0 8px 12px -6px rgba(0, 0, 0, 0.4);
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 18px 20px;
+      position: relative;
+      border: 1px solid var(--border);
+    }
+
+    /* 頂部列 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 1.02rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-hover);
+      border-color: #475569;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 首頁設定 */
+    .section-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .option-grid.theme-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .option-card {
+      border: 2px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .option-card:hover {
+      border-color: #475569;
+      background: var(--surface-hover);
+    }
+
+    .option-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: #c7d2fe;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .option-emoji {
+      font-size: 1.5rem;
+      line-height: 1.15;
+    }
+
+    .option-title {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .option-card.selected .option-title {
+      color: #c7d2fe;
+    }
+
+    .option-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .option-card.selected .option-desc {
+      color: #a5b4fc;
+    }
+
+    .best-record-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .best-record-label {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .best-record-value {
+      font-weight: 800;
+      color: #fbbf24;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -3px rgba(99, 102, 241, 0.4);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .primary-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    /* 遊戲畫面頂部資訊列 */
+    .hud-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .hud-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px 4px;
+      text-align: center;
+    }
+
+    .hud-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .hud-value {
+      font-size: 0.98rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-value.good { color: #34d399; }
+    .hud-value.highlight { color: #818cf8; }
+    .hud-value.streak { color: #fbbf24; }
+
+    /* 開局記憶倒數提示橫幅 */
+    .status-banner {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .status-banner.playing {
+      background: var(--surface);
+      border-color: var(--border);
+      color: #cbd5e1;
+    }
+
+    /* ====== 3D 翻牌網格區 ====== */
+    .cards-board {
+      display: grid;
+      gap: 10px;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto 14px;
+      perspective: 1000px;
+    }
+
+    .cards-board.grid-6 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .cards-board.grid-8 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .cards-board.grid-10 {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .memory-card {
+      width: 100%;
+      aspect-ratio: 3 / 3.4;
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .memory-card.flipped,
+    .memory-card.matched {
+      transform: rotateY(180deg);
+      cursor: default;
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    /* 卡背設計（星空圖騰） */
+    .card-back {
+      background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+      border: 2px solid #4f46e5;
+      color: rgba(165, 180, 252, 0.65);
+      font-size: 1.65rem;
+      font-weight: 900;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+      overflow: hidden;
+    }
+
+    .card-back::before {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border-radius: 9px;
+      border: 1.5px dashed rgba(129, 140, 248, 0.35);
+      pointer-events: none;
+    }
+
+    .memory-card:not(.flipped):not(.matched):hover .card-back {
+      border-color: #818cf8;
+      filter: brightness(1.12);
+    }
+
+    /* 卡面設計（翻開後的圖案或算式） */
+    .card-front {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border: 2.5px solid #6366f1;
+      transform: rotateY(180deg);
+      padding: 4px;
+      text-align: center;
+    }
+
+    .memory-card.matched .card-front {
+      border-color: #10b981;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.25) 0%, #0f172a 100%);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+      animation: matchPop 0.38s ease;
+    }
+
+    @keyframes matchPop {
+      0% { transform: rotateY(180deg) scale(1); }
+      50% { transform: rotateY(180deg) scale(1.09); }
+      100% { transform: rotateY(180deg) scale(1); }
+    }
+
+    .card-main-content {
+      font-size: 2.35rem;
+      line-height: 1.1;
+      font-weight: 900;
+    }
+
+    .cards-board.grid-10 .card-main-content {
+      font-size: 1.95rem;
+    }
+
+    .card-main-content.math-eq {
+      font-size: 1.35rem;
+      color: #fde047;
+      letter-spacing: -0.02em;
+    }
+
+    .card-main-content.math-ans {
+      font-size: 1.85rem;
+      color: #38bdf8;
+    }
+
+    .cards-board.grid-10 .card-main-content.math-eq {
+      font-size: 1.12rem;
+    }
+
+    .card-sub-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .memory-card.matched .card-sub-label {
+      color: #6ee7b7;
+    }
+
+    .game-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .quit-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+
+    .quit-btn:hover {
+      background: var(--surface);
+      color: var(--text-main);
+    }
+
+    /* 結算畫面 */
+    .result-hero {
+      text-align: center;
+      padding: 10px 0 16px;
+    }
+
+    .result-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: #fbbf24;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .result-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .result-stars-big {
+      font-size: 2.6rem;
+      letter-spacing: 6px;
+      margin: 6px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-box-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .stat-box-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #818cf8;
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      padding: 13px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .secondary-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    @media (max-width: 420px) {
+      .cards-board {
+        gap: 7px;
+      }
+      .card-main-content {
+        font-size: 1.95rem;
+      }
+      .cards-board.grid-10 .card-main-content {
+        font-size: 1.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 頂部列 -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">🃏</div>
+        <div>
+          <div class="brand-title">記憶翻牌小達人</div>
+          <div class="brand-subtitle">開局記憶預覽 · 配對專注力訓練</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="./index.html" class="icon-btn" title="返回遊戲大廳">🏠</a>
+        <button id="soundToggleBtn" class="icon-btn" title="切換音效">🔊</button>
+      </div>
+    </div>
+
+    <!-- 畫面 1：首頁設定 -->
+    <div id="startScreen" class="screen active">
+      <div class="section-label">1. 選擇卡片圖案主題</div>
+      <div class="option-grid theme-grid" id="themeSelector">
+        <div class="option-card selected" data-theme="animals">
+          <span class="option-emoji">🐶</span>
+          <span class="option-title">可愛動物</span>
+          <span class="option-desc">小狗貓熊與獅子</span>
+        </div>
+        <div class="option-card" data-theme="fruits">
+          <span class="option-emoji">🍓</span>
+          <span class="option-title">美味水果</span>
+          <span class="option-desc">草莓蘋果與西瓜</span>
+        </div>
+        <div class="option-card" data-theme="vehicles">
+          <span class="option-emoji">🚒</span>
+          <span class="option-title">交通工具</span>
+          <span class="option-desc">消防車飛機火箭</span>
+        </div>
+        <div class="option-card" data-theme="space">
+          <span class="option-emoji">🪐</span>
+          <span class="option-title">太空探險</span>
+          <span class="option-desc">星球飛碟外星人</span>
+        </div>
+        <div class="option-card" data-theme="ocean">
+          <span class="option-emoji">🐬</span>
+          <span class="option-title">海底世界</span>
+          <span class="option-desc">海豚章魚熱帶魚</span>
+        </div>
+        <div class="option-card" data-theme="math">
+          <span class="option-emoji">➕</span>
+          <span class="option-title">算式配對</span>
+          <span class="option-desc">例如 3+4 配對 7</span>
+        </div>
+      </div>
+
+      <div class="section-label">2. 選擇卡片數量（難度）</div>
+      <div class="option-grid" id="sizeSelector">
+        <div class="option-card selected" data-pairs="6">
+          <span class="option-title">🌱 簡單 (3×4)</span>
+          <span class="option-desc">共 12 張 (6 對)</span>
+        </div>
+        <div class="option-card" data-pairs="8">
+          <span class="option-title">⭐ 標準 (4×4)</span>
+          <span class="option-desc">共 16 張 (8 對)</span>
+        </div>
+        <div class="option-card" data-pairs="10">
+          <span class="option-title">👑 挑戰 (4×5)</span>
+          <span class="option-desc">共 20 張 (10 對)</span>
+        </div>
+      </div>
+
+      <div class="best-record-box">
+        <span class="best-record-label" id="bestRecordLabel">3×4 最少翻牌次數紀錄</span>
+        <span class="best-record-value" id="bestRecordValue">尚無紀錄</span>
+      </div>
+
+      <button id="startBtn" class="primary-btn">
+        <span>開始記憶翻牌</span>
+        <span>▶</span>
+      </button>
+    </div>
+
+    <!-- 畫面 2：遊戲進行 -->
+    <div id="gameScreen" class="screen">
+      <div class="hud-bar">
+        <div class="hud-item">
+          <div class="hud-label">配對進度</div>
+          <div class="hud-value good" id="hudMatched">0 / 6</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">翻牌次數</div>
+          <div class="hud-value highlight" id="hudMoves">0</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">連續配對</div>
+          <div class="hud-value streak" id="hudCombo">0 🔥</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">花費時間</div>
+          <div class="hud-value" id="hudTime">0.0s</div>
+        </div>
+      </div>
+
+      <div id="statusBanner" class="status-banner">
+        <span id="statusText">👀 請記住卡片位置！即將蓋上...</span>
+        <span id="statusSubText">準備開始</span>
+      </div>
+
+      <div id="cardsBoard" class="cards-board grid-6"></div>
+
+      <div class="game-footer">
+        <span>💡 翻開兩張相同的卡片即可完成配對</span>
+        <button id="quitBtn" class="quit-btn">返回設定</button>
+      </div>
+    </div>
+
+    <!-- 畫面 3：過關結算 -->
+    <div id="resultScreen" class="screen">
+      <div class="result-hero">
+        <span id="resultBadge" class="result-badge">🎉 全數配對成功！</span>
+        <div class="result-title" id="resultTitle">記憶力超群！</div>
+        <div class="result-stars-big" id="resultStarsBig">⭐⭐⭐</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">總翻牌次數</div>
+          <div class="stat-box-val" id="statMoves">10 次</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">完成時間</div>
+          <div class="stat-box-val" id="statTime">18.5 秒</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="backHomeBtn" class="secondary-btn">調整設定</button>
+        <button id="retryBtn" class="primary-btn">再玩一局 ↻</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== 音效合成器 ======
+    class SoundEffects {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, delay = 0, gainVal = 0.11) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      flip() {
+        this.playTone(520, 'sine', 0.055, 0, 0.09);
+      }
+
+      match(combo = 1) {
+        const base = 587.33 + Math.min(combo * 40, 240);
+        this.playTone(base, 'sine', 0.09, 0, 0.12);
+        this.playTone(base * 1.33, 'sine', 0.16, 0.06, 0.14);
+      }
+
+      mismatch() {
+        this.playTone(240, 'triangle', 0.12, 0, 0.11);
+        this.playTone(190, 'triangle', 0.16, 0.08, 0.11);
+      }
+
+      win() {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => this.playTone(n, 'sine', 0.22, idx * 0.08, 0.14));
+      }
+    }
+
+    const sfx = new SoundEffects();
+
+    // ====== 主題題庫定義 ======
+    const THEME_DECKS = {
+      animals: [
+        { icon: '🐶', name: '小狗' }, { icon: '🐱', name: '小貓' },
+        { icon: '🐼', name: '貓熊' }, { icon: '🦁', name: '獅子' },
+        { icon: '🐰', name: '兔子' }, { icon: '🦊', name: '狐狸' },
+        { icon: '🐸', name: '青蛙' }, { icon: '🐨', name: '無尾熊' },
+        { icon: '🐯', name: '老虎' }, { icon: '🐮', name: '乳牛' },
+        { icon: '🐷', name: '小豬' }, { icon: '🐵', name: '猴子' }
+      ],
+      fruits: [
+        { icon: '🍎', name: '蘋果' }, { icon: '🍌', name: '香蕉' },
+        { icon: '🍇', name: '葡萄' }, { icon: '🍉', name: '西瓜' },
+        { icon: '🍓', name: '草莓' }, { icon: '🍑', name: '水蜜桃' },
+        { icon: '🍍', name: '鳳梨' }, { icon: '🍒', name: '櫻桃' },
+        { icon: '🥝', name: '奇異果' }, { icon: '🍊', name: '橘子' },
+        { icon: '🍋', name: '檸檬' }, { icon: '🥭', name: '芒果' }
+      ],
+      vehicles: [
+        { icon: '🚗', name: '汽車' }, { icon: '🚒', name: '消防車' },
+        { icon: '🚓', name: '警車' }, { icon: '🚑', name: '救護車' },
+        { icon: '🚀', name: '火箭' }, { icon: '🚁', name: '直升機' },
+        { icon: '🚂', name: '火車' }, { icon: '✈️', name: '飛機' },
+        { icon: '🚢', name: '輪船' }, { icon: '🚜', name: '曳引機' },
+        { icon: '🚲', name: '腳踏車' }, { icon: '🚌', name: '公車' }
+      ],
+      space: [
+        { icon: '🚀', name: '火箭' }, { icon: '🛸', name: '飛碟' },
+        { icon: '🪐', name: '土星' }, { icon: '🌍', name: '地球' },
+        { icon: '🌙', name: '月亮' }, { icon: '⭐', name: '星星' },
+        { icon: '☄️', name: '彗星' }, { icon: '👨‍🚀', name: '太空人' },
+        { icon: '👽', name: '外星人' }, { icon: '🛰️', name: '衛星' },
+        { icon: '☀️', name: '太陽' }, { icon: '🔭', name: '望遠鏡' }
+      ],
+      ocean: [
+        { icon: '🐬', name: '海豚' }, { icon: '🐳', name: '鯨魚' },
+        { icon: '🐙', name: '章魚' }, { icon: '🦀', name: '螃蟹' },
+        { icon: '🐢', name: '海龜' }, { icon: '🐠', name: '熱帶魚' },
+        { icon: '🦈', name: '鯊魚' }, { icon: '🪼', name: '水母' },
+        { icon: '🦞', name: '龍蝦' }, { icon: '🐚', name: '貝殼' },
+        { icon: '🦑', name: '烏賊' }, { icon: '🐡', name: '河豚' }
+      ]
+    };
+
+    // 產生「算式配對」主題牌組（每對包含一張「算式卡」與一張「答案卡」，且每對答案不重複）
+    function buildMathPairs(pairCount) {
+      // 挑選不重複的目標答案 (2 ~ 18)
+      const possibleAnswers = [];
+      for (let ans = 2; ans <= 18; ans++) possibleAnswers.push(ans);
+      for (let i = possibleAnswers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [possibleAnswers[i], possibleAnswers[j]] = [possibleAnswers[j], possibleAnswers[i]];
+      }
+
+      const selectedAnswers = possibleAnswers.slice(0, pairCount);
+      const cards = [];
+
+      selectedAnswers.forEach((ans, pairId) => {
+        // 為該答案隨機產生一個個位數加法或減法算式
+        const candidates = [];
+        for (let a = 1; a <= 9; a++) {
+          for (let b = 1; b <= 9; b++) {
+            if (a + b === ans) candidates.push(`${a} + ${b}`);
+            if (a - b === ans) candidates.push(`${a} − ${b}`);
+          }
+        }
+        const eqText = candidates[Math.floor(Math.random() * candidates.length)];
+
+        cards.push({
+          pairId,
+          display: eqText,
+          subLabel: '算式',
+          extraClass: 'math-eq'
+        });
+        cards.push({
+          pairId,
+          display: String(ans),
+          subLabel: `答案 ${ans}`,
+          extraClass: 'math-ans'
+        });
+      });
+
+      return cards;
+    }
+
+    // ====== 遊戲狀態 ======
+    const state = {
+      theme: 'animals',
+      totalPairs: 6,          // 6 (3x4) | 8 (4x4) | 10 (4x5)
+      cards: [],              // [{ id, pairId, display, subLabel, extraClass, flipped, matched }]
+      firstCardIdx: null,
+      secondCardIdx: null,
+      isLocked: true,         // 開局預覽期間或兩張比對動畫中鎖定點擊
+      matchedPairs: 0,
+      moves: 0,
+      combo: 0,
+      startTimeMs: 0,
+      elapsedMs: 0,
+      timerId: null,
+      previewTimerId: null,
+      isPlaying: false
+    };
+
+    // ====== 最佳紀錄管理 ======
+    function getBestKey() {
+      return `memory_best_moves_${state.theme}_p${state.totalPairs}`;
+    }
+
+    function updateBestRecordUI() {
+      const sizeNames = { 6: '3×4 (6對)', 8: '4×4 (8對)', 10: '4×5 (10對)' };
+      document.getElementById('bestRecordLabel').textContent = `${sizeNames[state.totalPairs]} 最少翻牌紀錄`;
+      const raw = localStorage.getItem(getBestKey());
+      document.getElementById('bestRecordValue').textContent = raw ? `${raw} 次` : '尚無紀錄';
+    }
+
+    // ====== 畫面切換 ======
+    const screens = {
+      start: document.getElementById('startScreen'),
+      game: document.getElementById('gameScreen'),
+      result: document.getElementById('resultScreen')
+    };
+
+    function switchScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    // ====== 建立並洗牌 ======
+    function buildDeck() {
+      const pairCount = Number(state.totalPairs);
+      let rawCards = [];
+
+      if (state.theme === 'math') {
+        rawCards = buildMathPairs(pairCount);
+      } else {
+        const pool = [...THEME_DECKS[state.theme]];
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        const chosen = pool.slice(0, pairCount);
+        chosen.forEach((item, pairId) => {
+          rawCards.push({ pairId, display: item.icon, subLabel: item.name, extraClass: '' });
+          rawCards.push({ pairId, display: item.icon, subLabel: item.name, extraClass: '' });
+        });
+      }
+
+      // 洗牌
+      for (let i = rawCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rawCards[i], rawCards[j]] = [rawCards[j], rawCards[i]];
+      }
+
+      state.cards = rawCards.map((c, idx) => ({
+        ...c,
+        id: idx,
+        flipped: true, // 開局先全部翻開預覽
+        matched: false
+      }));
+    }
+
+    function renderBoard() {
+      const boardEl = document.getElementById('cardsBoard');
+      boardEl.className = `cards-board grid-${state.totalPairs}`;
+      boardEl.innerHTML = '';
+
+      state.cards.forEach((card, idx) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = `memory-card ${card.flipped ? 'flipped' : ''} ${card.matched ? 'matched' : ''}`;
+        cardEl.dataset.idx = idx;
+
+        cardEl.innerHTML = `
+          <div class="card-face card-back">✦</div>
+          <div class="card-face card-front">
+            <div class="card-main-content ${card.extraClass}">${card.display}</div>
+            <div class="card-sub-label">${card.subLabel}</div>
+          </div>
+        `;
+
+        boardEl.appendChild(cardEl);
+      });
+    }
+
+    function syncCardDOM(idx) {
+      const card = state.cards[idx];
+      const el = document.querySelector(`.memory-card[data-idx="${idx}"]`);
+      if (!el) return;
+      el.classList.toggle('flipped', card.flipped);
+      el.classList.toggle('matched', card.matched);
+    }
+
+    // ====== 開始遊戲（含開局記憶預覽倒數） ======
+    function startGame() {
+      sfx.init();
+      clearInterval(state.timerId);
+      clearInterval(state.previewTimerId);
+
+      state.firstCardIdx = null;
+      state.secondCardIdx = null;
+      state.matchedPairs = 0;
+      state.moves = 0;
+      state.combo = 0;
+      state.elapsedMs = 0;
+      state.isPlaying = false;
+      state.isLocked = true;
+
+      buildDeck();
+      renderBoard();
+      updateHud();
+      document.getElementById('hudTime').textContent = '0.0s';
+      switchScreen('game');
+
+      // 依卡片數量決定開局記憶預覽秒數 (6對: 2.5秒, 8對: 3秒, 10對: 3.5秒)
+      let previewRemaining = state.totalPairs === 6 ? 2.5 : (state.totalPairs === 8 ? 3.0 : 3.5);
+      const banner = document.getElementById('statusBanner');
+      const statusText = document.getElementById('statusText');
+      const statusSubText = document.getElementById('statusSubText');
+
+      banner.classList.remove('playing');
+      statusText.textContent = '👀 開局記憶時間：快記住卡片的位置！';
+      statusSubText.textContent = `${previewRemaining.toFixed(1)} 秒後蓋牌`;
+
+      state.previewTimerId = setInterval(() => {
+        previewRemaining = Math.max(0, previewRemaining - 0.1);
+        statusSubText.textContent = `${previewRemaining.toFixed(1)} 秒後蓋牌`;
+
+        if (previewRemaining <= 0) {
+          clearInterval(state.previewTimerId);
+          // 全部蓋上開始遊戲
+          state.cards.forEach((c, idx) => {
+            c.flipped = false;
+            syncCardDOM(idx);
+          });
+          sfx.flip();
+          state.isLocked = false;
+          state.isPlaying = true;
+          state.startTimeMs = performance.now();
+
+          banner.classList.add('playing');
+          statusText.textContent = state.theme === 'math'
+            ? '🧮 請翻出「算式」與對應的「答案」完成配對！'
+            : '🃏 請翻開兩張相同的卡片完成配對！';
+          statusSubText.textContent = '開始挑戰';
+
+          state.timerId = setInterval(() => {
+            if (!state.isPlaying) return;
+            state.elapsedMs = performance.now() - state.startTimeMs;
+            document.getElementById('hudTime').textContent = `${(state.elapsedMs / 1000).toFixed(1)}s`;
+          }, 100);
+        }
+      }, 100);
+    }
+
+    // ====== 點擊翻牌邏輯 ======
+    document.getElementById('cardsBoard').addEventListener('click', (e) => {
+      if (!state.isPlaying || state.isLocked) return;
+      const cardEl = e.target.closest('.memory-card');
+      if (!cardEl) return;
+
+      const idx = parseInt(cardEl.dataset.idx, 10);
+      const card = state.cards[idx];
+
+      // 已翻開或已配對的卡片不可重複點
+      if (card.flipped || card.matched) return;
+
+      sfx.flip();
+      card.flipped = true;
+      syncCardDOM(idx);
+
+      if (state.firstCardIdx === null) {
+        state.firstCardIdx = idx;
+        return;
+      }
+
+      // 翻開第二張卡片
+      state.secondCardIdx = idx;
+      state.moves++;
+      state.isLocked = true;
+
+      const firstCard = state.cards[state.firstCardIdx];
+      const secondCard = state.cards[state.secondCardIdx];
+
+      if (firstCard.pairId === secondCard.pairId) {
+        // 配對成功！
+        state.matchedPairs++;
+        state.combo++;
+        firstCard.matched = true;
+        secondCard.matched = true;
+        syncCardDOM(state.firstCardIdx);
+        syncCardDOM(state.secondCardIdx);
+
+        sfx.match(state.combo);
+        updateHud();
+
+        state.firstCardIdx = null;
+        state.secondCardIdx = null;
+        state.isLocked = false;
+
+        if (state.matchedPairs >= state.totalPairs) {
+          onGameWon();
+        }
+      } else {
+        // 配對失敗：停留 750ms 讓孩子記憶後自動蓋回
+        state.combo = 0;
+        updateHud();
+        setTimeout(() => {
+          sfx.mismatch();
+        }, 180);
+
+        setTimeout(() => {
+          firstCard.flipped = false;
+          secondCard.flipped = false;
+          syncCardDOM(firstCard.id);
+          syncCardDOM(secondCard.id);
+          state.firstCardIdx = null;
+          state.secondCardIdx = null;
+          state.isLocked = false;
+        }, 780);
+      }
+    });
+
+    function updateHud() {
+      document.getElementById('hudMatched').textContent = `${state.matchedPairs} / ${state.totalPairs}`;
+      document.getElementById('hudMoves').textContent = `${state.moves}`;
+      document.getElementById('hudCombo').textContent = `${state.combo} 🔥`;
+    }
+
+    function onGameWon() {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      sfx.win();
+
+      const totalSec = Number((state.elapsedMs / 1000).toFixed(1));
+      const key = getBestKey();
+      const prevBest = localStorage.getItem(key);
+      let isNewRecord = false;
+      if (!prevBest || state.moves < parseInt(prevBest, 10)) {
+        localStorage.setItem(key, String(state.moves));
+        isNewRecord = true;
+      }
+
+      // 計算星等評價 (若翻牌次數 <= 總對數 * 1.6 給 3 顆星，<= 總對數 * 2.2 給 2 顆星)
+      let stars = 3;
+      if (state.moves > state.totalPairs * 2.2) stars = 1;
+      else if (state.moves > state.totalPairs * 1.6) stars = 2;
+
+      setTimeout(() => {
+        document.getElementById('resultBadge').textContent = isNewRecord ? '🏆 刷新最少翻牌紀錄！' : '🎉 全數配對成功！';
+        document.getElementById('resultStarsBig').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+        document.getElementById('statMoves').textContent = `${state.moves} 次`;
+        document.getElementById('statTime').textContent = `${totalSec.toFixed(1)} 秒`;
+        updateBestRecordUI();
+        switchScreen('result');
+      }, 480);
+    }
+
+    // ====== 選單與按鈕事件綁定 ======
+    document.getElementById('themeSelector').addEventListener('click', (e) => {
+      const card = e.target.closest('.option-card');
+      if (!card) return;
+      document.querySelectorAll('#themeSelector .option-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.theme = card.dataset.theme;
+      updateBestRecordUI();
+    });
+
+    document.getElementById('sizeSelector').addEventListener('click', (e) => {
+      const card = e.target.closest('.option-card');
+      if (!card) return;
+      document.querySelectorAll('#sizeSelector .option-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.totalPairs = Number(card.dataset.pairs);
+      updateBestRecordUI();
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('retryBtn').addEventListener('click', startGame);
+    document.getElementById('backHomeBtn').addEventListener('click', () => switchScreen('start'));
+
+    document.getElementById('quitBtn').addEventListener('click', () => {
+      state.isPlaying = false;
+      clearInterval(state.timerId);
+      clearInterval(state.previewTimerId);
+      switchScreen('start');
+    });
+
+    document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+      sfx.enabled = !sfx.enabled;
+      e.currentTarget.textContent = sfx.enabled ? '🔊' : '🔇';
+    });
+
+    updateBestRecordUI();
+  </script>
+</body>
+</html>
