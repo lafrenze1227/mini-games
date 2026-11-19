@@ -594,9 +594,6 @@
         <button id="toggleFlashlightBtn" class="tool-btn">
           <span>🔦 手電筒模式：關</span>
         </button>
-        <button id="toggleHintBtn" class="tool-btn">
-          <span>💡 路線導引提示</span>
-        </button>
         <button id="newMazeBtn" class="tool-btn">
           <span>🔄 換一張地圖</span>
         </button>
@@ -1117,7 +1114,6 @@
       state.startTimeMs = performance.now();
       state.elapsedMs = 0;
 
-      document.getElementById('toggleHintBtn').classList.remove('active');
       syncFlashlightBtnUI();
 
       generateMaze(Number(state.size));
@@ -1252,12 +1248,6 @@
     document.getElementById('toggleFlashlightBtn').addEventListener('click', () => {
       state.vision = state.vision === 'flashlight' ? 'full' : 'flashlight';
       syncFlashlightBtnUI();
-      drawMaze();
-    });
-
-    document.getElementById('toggleHintBtn').addEventListener('click', (e) => {
-      state.showHintPath = !state.showHintPath;
-      e.currentTarget.classList.toggle('active', state.showHintPath);
       drawMaze();
     });
 

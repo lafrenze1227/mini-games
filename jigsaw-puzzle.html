@@ -707,24 +707,9 @@
         </div>
       </div>
 
-      <!-- 輔助工具列 -->
-      <div class="assist-toolbar">
-        <button id="toggleWatermarkBtn" class="tool-btn active" title="在棋盤底部顯示淡淡的原圖輔助對位">
-          <span>🖼️ 底圖浮水印：開</span>
-        </button>
-        <button id="toggleNumbersBtn" class="tool-btn" title="顯示每塊拼圖的順序編號">
-          <span>🔢 編號提示：關</span>
-        </button>
-        <button id="peekOriginalBtn" class="tool-btn" title="按住可偷看完整原圖">
-          <span>👀 按住看原圖</span>
-        </button>
-      </div>
-
       <!-- 拼圖主棋盤 -->
       <div class="board-container" id="boardContainer">
-        <div class="board-watermark show" id="boardWatermark"></div>
         <div class="puzzle-grid" id="puzzleGrid"></div>
-        <div class="board-peek-overlay" id="boardPeekOverlay"></div>
       </div>
 
       <div class="game-footer">
@@ -1249,10 +1234,6 @@
       state.startTimeMs = performance.now();
       state.elapsedMs = 0;
 
-      const imgUrl = getCurrentImageUrl();
-      document.getElementById('boardWatermark').style.backgroundImage = `url("${imgUrl}")`;
-      document.getElementById('boardPeekOverlay').style.backgroundImage = `url("${imgUrl}")`;
-
       const gridEl = document.getElementById('puzzleGrid');
       gridEl.classList.remove('solved');
       gridEl.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
@@ -1470,31 +1451,6 @@
 
     window.addEventListener('pointerup', finishPointerInteraction);
     window.addEventListener('pointercancel', finishPointerInteraction);
-
-    // ====== 輔助工具按鈕事件 ======
-    document.getElementById('toggleWatermarkBtn').addEventListener('click', (e) => {
-      state.showWatermark = !state.showWatermark;
-      document.getElementById('boardWatermark').classList.toggle('show', state.showWatermark);
-      e.currentTarget.classList.toggle('active', state.showWatermark);
-      e.currentTarget.innerHTML = `<span>🖼️ 底圖浮水印：${state.showWatermark ? '開' : '關'}</span>`;
-    });
-
-    document.getElementById('toggleNumbersBtn').addEventListener('click', (e) => {
-      state.showNumbers = !state.showNumbers;
-      document.getElementById('puzzleGrid').classList.toggle('show-numbers', state.showNumbers);
-      e.currentTarget.classList.toggle('active', state.showNumbers);
-      e.currentTarget.innerHTML = `<span>🔢 編號提示：${state.showNumbers ? '開' : '關'}</span>`;
-    });
-
-    const peekBtn = document.getElementById('peekOriginalBtn');
-    const peekOverlay = document.getElementById('boardPeekOverlay');
-    const showPeek = () => peekOverlay.classList.add('show');
-    const hidePeek = () => peekOverlay.classList.remove('show');
-
-    peekBtn.addEventListener('pointerdown', showPeek);
-    peekBtn.addEventListener('pointerup', hidePeek);
-    peekBtn.addEventListener('pointerleave', hidePeek);
-    peekBtn.addEventListener('pointercancel', hidePeek);
 
     // ====== 首頁與結算按鈕綁定 ======
     document.getElementById('sizeSelector').addEventListener('click', (e) => {
